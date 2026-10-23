@@ -27,7 +27,7 @@ jobs:
         run: |
           set -euo pipefail
           for d in _db/services/*/database/migrations; do
-            svc="$(basename "$(dirname "$(dirname "$(dirname "$d")")")")"
+            svc="$(basename "$(dirname "$(dirname "$d")")")"
             mkdir -p "services/$svc/database/migrations"
             cp -a "$d/." "services/$svc/database/migrations/"
           done

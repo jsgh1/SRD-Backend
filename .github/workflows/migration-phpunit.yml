@@ -33,6 +33,21 @@ jobs:
           done
           test -f services/identity/database/migrations/2026_09_07_000002_identity.php
           test -f services/records/database/migrations/2026_09_07_000001_records.php || test -n "$(find services/records/database/migrations -type f -name '*.php' -print -quit)"
+      - name: Checkout browser test fixtures
+        uses: actions/checkout@v4
+        with:
+          repository: jsgh1/SRD-Docker-Infra
+          ref: migration/extract-2026-10-22-snapshot
+          path: _infra
+      - name: Restore shared test fixtures and Laravel writable folders
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tools/browser-tests
+          cp _infra/tools/browser-tests/silence.mp3 tools/browser-tests/silence.mp3
+          for svc in gateway identity configuration records audit files calendar notifications treasury inventory chat; do
+            mkdir -p "services/$svc/bootstrap/cache" "services/$svc/storage/framework/cache/data" "services/$svc/storage/framework/sessions" "services/$svc/storage/framework/views" "services/$svc/storage/logs"
+          done
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:

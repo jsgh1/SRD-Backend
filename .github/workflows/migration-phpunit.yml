@@ -1,0 +1,47 @@
+name: Migration backend PHPUnit
+on:
+  pull_request:
+    branches: [dev]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  phpunit:
+    name: PHPUnit ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [gateway, identity, configuration, records, audit, files, calendar, notifications, treasury, inventory, chat]
+    steps:
+      - name: Checkout backend
+        uses: actions/checkout@v4
+      - name: Checkout matching migration database snapshot
+        uses: actions/checkout@v4
+        with:
+          repository: jsgh1/SRD-Database
+          ref: migration/extract-2026-10-22-snapshot
+          path: _db
+      - name: Reassemble migrations only in CI workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          for d in _db/services/*/database/migrations; do
+            svc="$(basename "$(dirname "$(dirname "$(dirname "$d")")")")"
+            mkdir -p "services/$svc/database/migrations"
+            cp -a "$d/." "services/$svc/database/migrations/"
+          done
+          test -f services/identity/database/migrations/2026_09_07_000002_identity.php
+          test -f services/records/database/migrations/2026_09_07_000001_records.php || test -n "$(find services/records/database/migrations -type f -name '*.php' -print -quit)"
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_sqlite, sqlite3, gd, zip, pcntl, dom, exif, fileinfo
+          coverage: none
+      - name: Install service dev dependencies
+        working-directory: services/${{ matrix.service }}
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Run service PHPUnit
+        working-directory: services/${{ matrix.service }}
+        run: php vendor/bin/phpunit --colors=never

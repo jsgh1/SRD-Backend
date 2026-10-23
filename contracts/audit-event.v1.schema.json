@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SRD audit event v1",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "organization_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "actor_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "service": {
+      "type": "string",
+      "enum": [
+        "identity",
+        "configuration",
+        "records",
+        "files",
+        "calendar",
+        "notifications",
+        "treasury",
+        "inventory",
+        "chat"
+      ]
+    },
+    "action": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "resource_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "result": {
+      "type": "string",
+      "enum": [
+        "success",
+        "rejected",
+        "failed"
+      ]
+    },
+    "correlation_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "occurred_at": {
+      "type": "string"
+    },
+    "event_version": {
+      "type": "integer",
+      "const": 1
+    }
+  },
+  "required": [
+    "id",
+    "organization_id",
+    "actor_id",
+    "service",
+    "action",
+    "resource_id",
+    "result",
+    "correlation_id",
+    "occurred_at",
+    "event_version"
+  ]
+}

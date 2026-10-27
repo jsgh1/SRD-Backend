@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: jsgh1/SRD-Database
-          ref: migration/extract-2026-10-22-snapshot
+          ref: 213b8f8ed0eacaca196b7a108ac2e03a6b521a49
           path: _db
       - name: Reassemble migrations only in CI workspace
         shell: bash
@@ -37,7 +37,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: jsgh1/SRD-Docker-Infra
-          ref: migration/extract-2026-10-22-snapshot
+          ref: 6107196043de99798ec5020417ef10cab0666ac2
           path: _infra
       - name: Restore shared test fixtures and Laravel writable folders
         shell: bash

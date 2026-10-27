@@ -16,12 +16,15 @@ jobs:
     steps:
       - name: Checkout backend
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Checkout matching migration database snapshot
         uses: actions/checkout@v4
         with:
           repository: jsgh1/SRD-Database
-          ref: 213b8f8ed0eacaca196b7a108ac2e03a6b521a49
+          ref: e7e5a704025bbe646cd9f842e39cd19295b958f8
           path: _db
+          persist-credentials: false
       - name: Reassemble migrations only in CI workspace
         shell: bash
         run: |
@@ -39,6 +42,7 @@ jobs:
           repository: jsgh1/SRD-Docker-Infra
           ref: 6107196043de99798ec5020417ef10cab0666ac2
           path: _infra
+          persist-credentials: false
       - name: Restore shared test fixtures and Laravel writable folders
         shell: bash
         run: |

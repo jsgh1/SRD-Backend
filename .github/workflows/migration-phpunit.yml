@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: jsgh1/SRD-Database
-          ref: e7e5a704025bbe646cd9f842e39cd19295b958f8
+          ref: a96fc6e40e18c19adb6588362f53fb0c8bce5e33
           path: _db
           persist-credentials: false
       - name: Reassemble migrations only in CI workspace

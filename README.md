@@ -111,7 +111,7 @@ Los `phpunit.xml` configuran SQLite en memoria para las suites de funcionalidad.
 
 La matriz de PHPUnit instala PCOV y conserva un reporte Clover por servicio como artefacto de cada ejecución. La primera cobertura medida será una línea base; no se fija un mínimo global hasta revisar esa medición y separar las pruebas SQLite de las integraciones MySQL.
 
-En el mismo job de cada servicio, CI compara las rutas y métodos registrados por `php artisan route:list --json` con las operaciones declaradas en su contrato OpenAPI. Esta comprobación cubre correspondencia de rutas; no sustituye la validación de esquemas, permisos ni respuestas.
+En el mismo job de cada servicio, CI comprueba que cada operación declarada en OpenAPI corresponda con una ruta y método de Laravel. También informa las rutas que todavía no aparecen completamente en el contrato. Esta comprobación cubre correspondencia de rutas; no sustituye la validación de esquemas, permisos ni respuestas.
 
 Para pruebas del sistema real, el repositorio de infraestructura incluye scripts como `Test-Browser.ps1`, `Test-MySqlIsolation.ps1` y verificaciones de módulos. Las pruebas E2E **crean datos sintéticos**: usar exclusivamente entornos de prueba autorizados.
 

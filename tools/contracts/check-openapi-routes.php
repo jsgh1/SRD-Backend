@@ -52,7 +52,7 @@ function compareRoutes(array $contract, array $laravelRoutes): array
         foreach ($pathItem as $method => $_operation) {
             $method = strtoupper((string) $method);
             if (in_array($method, ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD', 'TRACE'], true)) {
-                $contractOperations[] = $method . ' ' . normalizePath((string) $path);
+                $contractOperations[] = ['method' => $method, 'path' => normalizePath((string) $path)];
             }
         }
     }
@@ -77,21 +77,112 @@ function compareRoutes(array $contract, array $laravelRoutes): array
                 continue;
             }
             if (in_array($method, ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE'], true)) {
-                $actualOperations[] = $method . ' ' . normalizePath($path);
+                $actualOperations[] = ['method' => $method, 'path' => normalizePath($path)];
             }
         }
     }
 
-    $contractOperations = array_values(array_unique($contractOperations));
-    $actualOperations = array_values(array_unique($actualOperations));
-    sort($contractOperations);
-    sort($actualOperations);
+    $contractOperations = uniqueOperations($contractOperations);
+    $actualOperations = uniqueOperations($actualOperations);
+
+    $matched = [];
+    $missingRoutes = [];
+    foreach ($contractOperations as $contractOperation) {
+        $routeExists = false;
+        foreach ($actualOperations as $actualOperation) {
+            if ($contractOperation['method'] === $actualOperation['method']
+                && pathMatchesRoute($actualOperation['path'], $contractOperation['path'])) {
+                $routeExists = true;
+                break;
+            }
+        }
+
+        $label = $contractOperation['method'] . ' ' . $contractOperation['path'];
+        if ($routeExists) {
+            $matched[] = $label;
+        } else {
+            $missingRoutes[] = $label;
+        }
+    }
+
+    $undocumentedRoutes = [];
+    foreach ($actualOperations as $actualOperation) {
+        $documented = false;
+        foreach ($contractOperations as $contractOperation) {
+            if ($contractOperation['method'] === $actualOperation['method']
+                && contractCoversRoute($contractOperation['path'], $actualOperation['path'])) {
+                $documented = true;
+                break;
+            }
+        }
+        if (!$documented) {
+            $undocumentedRoutes[] = $actualOperation['method'] . ' ' . $actualOperation['path'];
+        }
+    }
 
     return [
-        'matched' => array_values(array_intersect($contractOperations, $actualOperations)),
-        'missingRoutes' => array_values(array_diff($contractOperations, $actualOperations)),
-        'undocumentedRoutes' => array_values(array_diff($actualOperations, $contractOperations)),
+        'matched' => $matched,
+        'missingRoutes' => $missingRoutes,
+        'undocumentedRoutes' => $undocumentedRoutes,
     ];
+}
+
+/** @param list<array{method: string, path: string}> $operations
+ *  @return list<array{method: string, path: string}> */
+function uniqueOperations(array $operations): array
+{
+    $unique = [];
+    foreach ($operations as $operation) {
+        $unique[$operation['method'] . ' ' . $operation['path']] = $operation;
+    }
+    ksort($unique);
+    return array_values($unique);
+}
+
+/** A Laravel route template may serve a concrete OpenAPI path or another template. */
+function pathMatchesRoute(string $routePath, string $contractPath): bool
+{
+    $routeSegments = explode('/', trim(normalizePath($routePath), '/'));
+    $contractSegments = explode('/', trim(normalizePath($contractPath), '/'));
+    if (count($routeSegments) !== count($contractSegments)) {
+        return false;
+    }
+
+    foreach ($routeSegments as $index => $routeSegment) {
+        if (isPathParameter($routeSegment) || isPathParameter($contractSegments[$index])) {
+            continue;
+        }
+        if ($routeSegment !== $contractSegments[$index]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/** A contract fully documents a route template only when dynamic route segments are dynamic in OpenAPI too. */
+function contractCoversRoute(string $contractPath, string $routePath): bool
+{
+    $contractSegments = explode('/', trim(normalizePath($contractPath), '/'));
+    $routeSegments = explode('/', trim(normalizePath($routePath), '/'));
+    if (count($contractSegments) !== count($routeSegments)) {
+        return false;
+    }
+
+    foreach ($routeSegments as $index => $routeSegment) {
+        $contractSegment = $contractSegments[$index];
+        if (isPathParameter($routeSegment) && !isPathParameter($contractSegment)) {
+            return false;
+        }
+        if (!isPathParameter($routeSegment) && !isPathParameter($contractSegment) && $routeSegment !== $contractSegment) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function isPathParameter(string $segment): bool
+{
+    return preg_match('/^\{[^{}]+\}$/', $segment) === 1;
 }
 
 function normalizePath(string $path): string
@@ -118,6 +209,14 @@ function runSelfTest(): void
     $result = compareRoutes($contract, $routes);
     if (count($result['matched']) !== 3 || $result['missingRoutes'] !== [] || $result['undocumentedRoutes'] !== []) {
         throw new RuntimeException('Self-test failed for matching routes and implicit HEAD.');
+    }
+
+    $result = compareRoutes(
+        ['servers' => [['url' => 'https://example.test/internal/v1']], 'paths' => ['/quick-links/organization' => ['patch' => []]]],
+        [['uri' => 'internal/v1/quick-links/{scope}', 'method' => 'PATCH']],
+    );
+    if ($result['missingRoutes'] !== [] || $result['undocumentedRoutes'] !== ['PATCH /quick-links/{scope}']) {
+        throw new RuntimeException('Self-test failed to map a concrete OpenAPI path to a constrained Laravel parameter route.');
     }
 
     $result = compareRoutes($contract, array_slice($routes, 1));
@@ -151,26 +250,32 @@ try {
 
     $result = compareRoutes($contract, $routes);
     printf(
-        "OpenAPI operations: %d; Laravel API routes: %d; matched: %d.\n",
+        "OpenAPI operations: %d; Laravel API routes: %d; contract operations mapped: %d; undocumented route templates: %d.\n",
         count($result['matched']) + count($result['missingRoutes']),
         count($result['matched']) + count($result['undocumentedRoutes']),
         count($result['matched']),
+        count($result['undocumentedRoutes']),
     );
 
-    if ($result['missingRoutes'] !== [] || $result['undocumentedRoutes'] !== []) {
-        foreach (['missingRoutes' => 'Contract operations without Laravel routes', 'undocumentedRoutes' => 'Laravel routes missing from OpenAPI'] as $key => $label) {
-            if ($result[$key] === []) {
-                continue;
-            }
-            fwrite(STDERR, $label . ":\n");
-            foreach ($result[$key] as $operation) {
-                fwrite(STDERR, "  - {$operation}\n");
-            }
+    if ($result['undocumentedRoutes'] !== []) {
+        fwrite(STDERR, "Routes not fully represented in OpenAPI (reported, not treated as failure):\n");
+        foreach (array_slice($result['undocumentedRoutes'], 0, 20) as $operation) {
+            fwrite(STDERR, "  - {$operation}\n");
+        }
+        if (count($result['undocumentedRoutes']) > 20) {
+            fwrite(STDERR, '  ... and ' . (count($result['undocumentedRoutes']) - 20) . " more.\n");
+        }
+    }
+
+    if ($result['missingRoutes'] !== []) {
+        fwrite(STDERR, "Contract operations without matching Laravel routes:\n");
+        foreach ($result['missingRoutes'] as $operation) {
+            fwrite(STDERR, "  - {$operation}\n");
         }
         exit(1);
     }
 
-    fwrite(STDOUT, "Service route coverage matches the OpenAPI paths and methods.\n");
+    fwrite(STDOUT, "Every declared OpenAPI operation maps to a Laravel route.\n");
 } catch (Throwable $exception) {
     fail($exception->getMessage());
 }

@@ -109,6 +109,8 @@ php vendor/phpunit/phpunit/phpunit
 
 Los `phpunit.xml` configuran SQLite en memoria para las suites de funcionalidad. La CI `migration-phpunit.yml` incorpora temporalmente migraciones desde SRD-Database y ejecuta una matriz para los **11 servicios**. En la validación de migración del 23/10/2026 se obtuvieron **305 pruebas y 6.292 aserciones** exitosas ([ejecución](https://github.com/jsgh1/SRD-Backend/actions/runs/39979516811)). Es una evidencia histórica, no una garantía de ejecuciones futuras.
 
+La matriz de PHPUnit instala PCOV y conserva un reporte Clover por servicio como artefacto de cada ejecución. La primera cobertura medida será una línea base; no se fija un mínimo global hasta revisar esa medición y separar las pruebas SQLite de las integraciones MySQL.
+
 Para pruebas del sistema real, el repositorio de infraestructura incluye scripts como `Test-Browser.ps1`, `Test-MySqlIsolation.ps1` y verificaciones de módulos. Las pruebas E2E **crean datos sintéticos**: usar exclusivamente entornos de prueba autorizados.
 
 ## 8. Seguridad y colaboración

@@ -57,10 +57,20 @@ jobs:
         with:
           php-version: '8.4'
           extensions: mbstring, pdo_sqlite, sqlite3, gd, zip, pcntl, dom, exif, fileinfo
-          coverage: none
+          coverage: pcov
       - name: Install service dev dependencies
         working-directory: services/${{ matrix.service }}
         run: composer install --no-interaction --prefer-dist --no-progress
-      - name: Run service PHPUnit
+      - name: Prepare per-service coverage output
         working-directory: services/${{ matrix.service }}
-        run: php vendor/bin/phpunit --colors=never
+        run: mkdir -p coverage
+      - name: Run service PHPUnit and collect coverage
+        working-directory: services/${{ matrix.service }}
+        run: php vendor/bin/phpunit --colors=never --coverage-clover=coverage/clover.xml
+      - name: Publish per-service coverage artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phpunit-coverage-${{ matrix.service }}
+          path: services/${{ matrix.service }}/coverage/clover.xml
+          if-no-files-found: warn

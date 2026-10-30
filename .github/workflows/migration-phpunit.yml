@@ -61,6 +61,14 @@ jobs:
       - name: Install service dev dependencies
         working-directory: services/${{ matrix.service }}
         run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Validate service OpenAPI routes
+        working-directory: services/${{ matrix.service }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          php ../../tools/contracts/check-openapi-routes.php --self-test
+          php artisan route:list --json > "$RUNNER_TEMP/${{ matrix.service }}-routes.json"
+          php ../../tools/contracts/check-openapi-routes.php "../../contracts/${{ matrix.service }}.openapi.json" "$RUNNER_TEMP/${{ matrix.service }}-routes.json"
       - name: Prepare per-service coverage output
         working-directory: services/${{ matrix.service }}
         run: mkdir -p coverage

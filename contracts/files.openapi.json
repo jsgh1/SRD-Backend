@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "SRD Archivos: API interna de fotografías",
+    "title": "SRD Files: API interna de Carpeta, archivos y fotografías",
     "version": "0.1.0",
     "description": "Servicio incorporado a Compose y conectado a rutas autenticadas del gateway. Solo emisor gateway con contexto de sesión previamente validada. El servicio consulta a Registros o Inventario y exige antivirus real y comprobación reciente de firmas. Este contrato describe su API interna. Las rutas de bienes verifican la junta y el estado activo en Inventario; la lectura se conserva tras la baja. La ruta photo-deletions admite exclusivamente al emisor records para órdenes persistentes de limpieza."
   },
@@ -17,6 +17,191 @@
         "in": "header",
         "name": "X-SRD-Context",
         "description": "Contexto HMAC ligado a audiencia files, cuerpo, método, ruta, nonce y caducidad; incluye junta, usuario, rol y session_id."
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "required": [
+          "error",
+          "correlation_id"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message",
+              "fields"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "fields": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "correlation_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "FolderDocumentMetadata": {
+        "type": "object",
+        "required": [
+          "id",
+          "folder_id",
+          "name",
+          "mime",
+          "bytes",
+          "sha256",
+          "created_at",
+          "version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "folder_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "mime": {
+            "type": "string"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20971520
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "FolderDocumentListResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "items",
+              "total",
+              "page_size",
+              "page"
+            ],
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FolderDocumentMetadata"
+                }
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "page_size": {
+                "type": "integer",
+                "const": 25
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        }
+      },
+      "FolderDocumentDownloadResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FolderDocumentMetadata"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "content"
+                ],
+                "properties": {
+                  "content": {
+                    "type": "string",
+                    "contentEncoding": "base64",
+                    "maxLength": 27962028,
+                    "description": "Contenido original codificado en base64."
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "FolderQuotaResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "used_bytes",
+              "limit_bytes",
+              "available_bytes"
+            ],
+            "properties": {
+              "used_bytes": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "limit_bytes": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "available_bytes": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -1518,6 +1703,105 @@
             "description": "Cuota insuficiente"
           }
         }
+      },
+      "get": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "listFolderDocumentsInternal",
+        "summary": "Listar documentos de Carpeta",
+        "description": "Lista únicamente documentos listos y no eliminados para la junta del contexto interno firmado. El contexto debe incluir permiso de lectura para la carpeta.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "folder_id",
+            "in": "query",
+            "required": false,
+            "description": "Filtra por carpeta. Omitirlo selecciona la raíz.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Página de 25 documentos; comienza en 1.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000,
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderDocumentListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "El contexto de acceso no es válido o la sesión no está autenticada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no tiene permiso para esta operación o carpeta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No se encontró la carpeta o el documento en la junta activa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Los parámetros no cumplen las reglas de validación.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Files o un componente necesario no está disponible; el contenido no pudo verificarse.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/scheduler-status": {
@@ -1600,6 +1884,132 @@
           },
           "507": {
             "description": "Cuota insuficiente"
+          }
+        }
+      }
+    },
+    "/folder-documents/{id}/download": {
+      "get": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "downloadFolderDocumentInternal",
+        "summary": "Descargar un documento privado",
+        "description": "Devuelve metadatos y contenido original en base64. El documento debe pertenecer a la junta activa del contexto firmado y la cuenta debe tener permiso de lectura.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identificador UUID del documento.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderDocumentDownloadResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "El contexto de acceso no es válido o la sesión no está autenticada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no tiene permiso para esta operación o carpeta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No se encontró la carpeta o el documento en la junta activa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Files o un componente necesario no está disponible; el contenido no pudo verificarse.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/folder-quota": {
+      "get": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "readFolderQuotaInternal",
+        "summary": "Consultar el espacio de Carpeta",
+        "description": "Devuelve bytes reservados, el límite y el espacio disponible para la junta del contexto interno firmado. Requiere permiso para administrar Carpeta.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderQuotaResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "El contexto de acceso no es válido o la sesión no está autenticada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no tiene permiso para esta operación o carpeta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }

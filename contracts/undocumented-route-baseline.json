@@ -17,7 +17,6 @@
                                      "GET /folder-documents/{id}/preview",
                                      "GET /folder-documents/search",
                                      "GET /folders",
-                                     "GET /invitations/person/{id}/status",
                                      "GET /members/folder-readers",
                                      "GET /persons/export-jobs/{id}",
                                      "GET /persons/export-jobs/{id}/download",
@@ -46,7 +45,6 @@
                                  ],
                      "identity":  [
                                       "GET /contacts/{id}",
-                                      "GET /invitations/person/{id}/status",
                                       "GET /members/folder-readers",
                                       "POST /members/folder-readers/verify",
                                       "POST /persons/{id}/detach-for-erasure",

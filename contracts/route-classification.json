@@ -67,10 +67,6 @@
                                                         "category":  "public"
                                                     },
                                                     {
-                                                        "operation":  "GET /invitations/person/{id}/status",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "GET /members/folder-readers",
                                                         "category":  "public"
                                                     },
@@ -177,10 +173,6 @@
                                       "routes":  [
                                                      {
                                                          "operation":  "GET /contacts/{id}",
-                                                         "category":  "internal"
-                                                     },
-                                                     {
-                                                         "operation":  "GET /invitations/person/{id}/status",
                                                          "category":  "internal"
                                                      },
                                                      {

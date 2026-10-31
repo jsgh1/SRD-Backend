@@ -4272,6 +4272,111 @@
           }
         ]
       }
+    },
+    "/invitations/person/{id}/status": {
+      "get": {
+        "summary": "Consultar si una persona ya tiene acceso o una invitación pendiente",
+        "description": "Contrato interno invocado por el Gateway mediante X-SRD-Context firmado. Requiere members.invite (superadmin, admin o registrar) y consulta exclusivamente la organización del principal firmado; no acepta organization_id del solicitante.",
+        "operationId": "get_invitation_person_status",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "x-srd-authorization": {
+          "tenant": "organization_id del principal autenticado; nunca se acepta como parámetro del cliente",
+          "roles": [
+            "superadmin",
+            "admin",
+            "registrar"
+          ]
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identificador de la ficha de persona dentro de la junta activa.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estado de invitación de la persona dentro de la junta activa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/InvitationPersonStatus"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error normalizado 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error normalizado 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error normalizado 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error normalizado 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -6255,6 +6360,22 @@
           "inherit",
           "items"
         ]
+      },
+      "InvitationPersonStatus": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "available",
+              "pending",
+              "active"
+            ]
+          }
+        }
       }
     },
     "securitySchemes": {

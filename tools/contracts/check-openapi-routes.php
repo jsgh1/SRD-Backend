@@ -192,6 +192,28 @@ function normalizePath(string $path): string
     return $path === '//' ? '/' : $path;
 }
 
+/** @param list<string> $undocumentedRoutes
+ *  @param list<string> $baselineRoutes
+ *  @return array{new: list<string>, stale: list<string>} */
+function compareUndocumentedBaseline(array $undocumentedRoutes, array $baselineRoutes): array
+{
+    foreach ($baselineRoutes as $route) {
+        if (!is_string($route) || preg_match('/^(GET|POST|PUT|PATCH|DELETE|OPTIONS|TRACE) \/\S*$/', $route) !== 1) {
+            throw new RuntimeException('Undocumented-route baseline entries must use "METHOD /path" format.');
+        }
+    }
+
+    $actual = array_values(array_unique($undocumentedRoutes));
+    $baseline = array_values(array_unique($baselineRoutes));
+    sort($actual);
+    sort($baseline);
+
+    return [
+        'new' => array_values(array_diff($actual, $baseline)),
+        'stale' => array_values(array_diff($baseline, $actual)),
+    ];
+}
+
 function runSelfTest(): void
 {
     $contract = [
@@ -219,6 +241,14 @@ function runSelfTest(): void
         throw new RuntimeException('Self-test failed to map a concrete OpenAPI path to a constrained Laravel parameter route.');
     }
 
+    $result = compareRoutes(
+        ['servers' => [['url' => 'https://example.test/internal/v1']], 'paths' => ['/quick-links/{scope}' => ['patch' => []]]],
+        [['uri' => 'internal/v1/quick-links/{scope}', 'method' => 'PATCH']],
+    );
+    if ($result['missingRoutes'] !== [] || $result['undocumentedRoutes'] !== []) {
+        throw new RuntimeException('Self-test failed to match a documented constrained Laravel parameter route.');
+    }
+
     $result = compareRoutes($contract, array_slice($routes, 1));
     if ($result['missingRoutes'] !== ['GET /widgets', 'POST /widgets']) {
         throw new RuntimeException('Self-test failed to detect contract operations without Laravel routes.');
@@ -227,6 +257,19 @@ function runSelfTest(): void
     $result = compareRoutes($contract, [...$routes, ['uri' => 'api/v1/widgets/{widgetId}', 'method' => 'DELETE']]);
     if ($result['undocumentedRoutes'] !== ['DELETE /widgets/{widgetId}']) {
         throw new RuntimeException('Self-test failed to detect undocumented Laravel routes.');
+    }
+
+    $baseline = compareUndocumentedBaseline(['PATCH /quick-links/{scope}'], ['PATCH /quick-links/{scope}']);
+    if ($baseline['new'] !== [] || $baseline['stale'] !== []) {
+        throw new RuntimeException('Self-test failed for a synchronized undocumented-route baseline.');
+    }
+
+    $baseline = compareUndocumentedBaseline(
+        ['PATCH /quick-links/{scope}', 'POST /new-route'],
+        ['PATCH /quick-links/{scope}', 'DELETE /removed-route'],
+    );
+    if ($baseline['new'] !== ['POST /new-route'] || $baseline['stale'] !== ['DELETE /removed-route']) {
+        throw new RuntimeException('Self-test failed to detect undocumented-route baseline drift.');
     }
 
     fwrite(STDOUT, "OpenAPI route checker self-test passed.\n");
@@ -238,8 +281,8 @@ try {
         exit(0);
     }
 
-    if ($argc !== 3) {
-        fail('Usage: php check-openapi-routes.php <openapi.json> <laravel-route-list.json>');
+    if ($argc !== 3 && $argc !== 4) {
+        fail('Usage: php check-openapi-routes.php <openapi.json> <laravel-route-list.json> [undocumented-route-baseline.json]');
     }
 
     $contract = decodeJsonFile($argv[1]);
@@ -265,6 +308,36 @@ try {
         if (count($result['undocumentedRoutes']) > 20) {
             fwrite(STDERR, '  ... and ' . (count($result['undocumentedRoutes']) - 20) . " more.\n");
         }
+    }
+
+    if ($argc === 4) {
+        $baseline = decodeJsonFile($argv[3]);
+        if (!is_array($baseline) || ($baseline['version'] ?? null) !== 1 || !is_array($baseline['services'] ?? null)) {
+            fail('Undocumented-route baseline must be a version 1 object containing a services map.');
+        }
+
+        $contractFilename = basename($argv[1]);
+        $service = str_ends_with($contractFilename, '.openapi.json')
+            ? substr($contractFilename, 0, -strlen('.openapi.json'))
+            : pathinfo($contractFilename, PATHINFO_FILENAME);
+        $baselineRoutes = $baseline['services'][$service] ?? [];
+        if (!is_array($baselineRoutes) || !array_is_list($baselineRoutes)) {
+            fail("Undocumented-route baseline for {$service} must be a list.");
+        }
+
+        $drift = compareUndocumentedBaseline($result['undocumentedRoutes'], $baselineRoutes);
+        if ($drift['new'] !== [] || $drift['stale'] !== []) {
+            fwrite(STDERR, "Undocumented-route baseline drift for {$service}:\n");
+            foreach ($drift['new'] as $operation) {
+                fwrite(STDERR, "  New route requires OpenAPI documentation or baseline review: {$operation}\n");
+            }
+            foreach ($drift['stale'] as $operation) {
+                fwrite(STDERR, "  Stale baseline entry should be removed: {$operation}\n");
+            }
+            exit(1);
+        }
+
+        printf("Undocumented-route baseline synchronized: %d known route templates remain for %s.\n", count($baselineRoutes), $service);
     }
 
     if ($result['missingRoutes'] !== []) {

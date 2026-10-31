@@ -1,0 +1,132 @@
+{
+    "version":  1,
+    "description":  "Explicit inventory of pre-existing undocumented Laravel route templates. Entries remain open contract debt; this baseline only blocks unreviewed route drift.",
+    "services":  {
+                     "gateway":  [
+                                     "DELETE /conversations/{id}/messages",
+                                     "DELETE /conversations/{id}/messages/{messageId}",
+                                     "DELETE /folder-documents/{id}",
+                                     "DELETE /folders/{id}",
+                                     "DELETE /users/{id}/photos/avatar",
+                                     "GET /contacts/{id}",
+                                     "GET /conversations/{id}/calls/{callId}",
+                                     "GET /conversations/{id}/calls/{callId}/signals",
+                                     "GET /conversations/{id}/messages/{messageId}/attachment",
+                                     "GET /conversations/{id}/pinned",
+                                     "GET /conversations/{id}/search",
+                                     "GET /folder-access",
+                                     "GET /folder-documents",
+                                     "GET /folder-documents/{id}/download",
+                                     "GET /folder-documents/{id}/preview",
+                                     "GET /folder-documents/search",
+                                     "GET /folder-quota",
+                                     "GET /folders",
+                                     "GET /invitations/person/{id}/status",
+                                     "GET /members/folder-readers",
+                                     "GET /persons/export-jobs/{id}",
+                                     "GET /persons/export-jobs/{id}/download",
+                                     "GET /privacy-requests",
+                                     "GET /system/privacy-erasures",
+                                     "GET /system/services",
+                                     "GET /users/{id}/photos",
+                                     "GET /users/{id}/photos/avatar",
+                                     "GET /voice-calls",
+                                     "GET /voice-calls/ice-config",
+                                     "PATCH /folder-documents/{id}",
+                                     "PATCH /folders/{id}",
+                                     "PATCH /privacy-requests/{id}",
+                                     "POST /auth/{action}",
+                                     "POST /conversations/{id}/activity",
+                                     "POST /conversations/{id}/calls",
+                                     "POST /conversations/{id}/calls/{callId}/signal",
+                                     "POST /conversations/{id}/calls/{callId}/transition",
+                                     "POST /conversations/{id}/messages/{messageId}/pin",
+                                     "POST /folder-documents/{id}/move",
+                                     "POST /folders",
+                                     "POST /folders/{id}/move",
+                                     "POST /persons/export-jobs",
+                                     "POST /privacy-requests",
+                                     "POST /privacy-requests/{id}/execute-erasure",
+                                     "PUT /folder-access",
+                                     "PUT /users/{id}/photos/avatar"
+                                 ],
+                     "identity":  [
+                                      "GET /contacts/{id}",
+                                      "GET /invitations/person/{id}/status",
+                                      "GET /members/folder-readers",
+                                      "POST /members/folder-readers/verify",
+                                      "POST /persons/{id}/detach-for-erasure",
+                                      "POST /persons/{id}/self-photo-access",
+                                      "POST /users/{id}/photo-access"
+                                  ],
+                     "configuration":  [
+
+                                       ],
+                     "records":  [
+                                     "GET /persons/export-jobs/{id}",
+                                     "GET /persons/export-jobs/{id}/download",
+                                     "GET /privacy-erasure-status",
+                                     "GET /privacy-requests",
+                                     "GET /public-logo/{id}",
+                                     "PATCH /privacy-requests/{id}",
+                                     "POST /persons/export-jobs",
+                                     "POST /privacy-requests",
+                                     "POST /privacy-requests/{id}/execute-erasure"
+                                 ],
+                     "audit":  [
+
+                               ],
+                     "files":  [
+                                   "DELETE /folder-documents/{id}",
+                                   "DELETE /folders/{id}",
+                                   "DELETE /users/{id}/photos/{slot}",
+                                   "GET /antivirus-status",
+                                   "GET /chat-attachments/{id}",
+                                   "GET /folder-access",
+                                   "GET /folder-documents",
+                                   "GET /folder-documents/{id}/download",
+                                   "GET /folder-documents/{id}/preview",
+                                   "GET /folder-documents/search",
+                                   "GET /folder-quota",
+                                   "GET /folders",
+                                   "GET /users/{id}/photos",
+                                   "GET /users/{id}/photos/{slot}",
+                                   "PATCH /folder-documents/{id}",
+                                   "PATCH /folders/{id}",
+                                   "POST /chat-attachments",
+                                   "POST /folder-documents/{id}/move",
+                                   "POST /folders",
+                                   "POST /folders/{id}/move",
+                                   "PUT /folder-access",
+                                   "PUT /users/{id}/photos/{slot}"
+                               ],
+                     "calendar":  [
+
+                                  ],
+                     "notifications":  [
+
+                                       ],
+                     "treasury":  [
+
+                                  ],
+                     "inventory":  [
+
+                                   ],
+                     "chat":  [
+                                  "DELETE /conversations/{id}/messages",
+                                  "DELETE /conversations/{id}/messages/{messageId}",
+                                  "GET /chat-attachment-references/{id}",
+                                  "GET /conversations/{conversationId}/calls/{callId}",
+                                  "GET /conversations/{conversationId}/calls/{callId}/signals",
+                                  "GET /conversations/{id}/messages/{messageId}/attachment",
+                                  "GET /conversations/{id}/pinned",
+                                  "GET /conversations/{id}/search",
+                                  "GET /voice-calls",
+                                  "POST /conversations/{conversationId}/calls",
+                                  "POST /conversations/{conversationId}/calls/{callId}/signal",
+                                  "POST /conversations/{conversationId}/calls/{callId}/transition",
+                                  "POST /conversations/{id}/activity",
+                                  "POST /conversations/{id}/messages/{messageId}/pin"
+                              ]
+                 }
+}

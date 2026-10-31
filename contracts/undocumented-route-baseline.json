@@ -32,7 +32,6 @@
                                      "PATCH /folders/{id}",
                                      "PATCH /privacy-requests/{id}",
                                      "POST /auth/{action}",
-                                     "POST /conversations/{id}/activity",
                                      "POST /conversations/{id}/calls",
                                      "POST /conversations/{id}/calls/{callId}/signal",
                                      "POST /conversations/{id}/calls/{callId}/transition",
@@ -117,7 +116,6 @@
                                   "POST /conversations/{conversationId}/calls",
                                   "POST /conversations/{conversationId}/calls/{callId}/signal",
                                   "POST /conversations/{conversationId}/calls/{callId}/transition",
-                                  "POST /conversations/{id}/activity",
                                   "POST /conversations/{id}/messages/{messageId}/pin"
                               ]
                  }

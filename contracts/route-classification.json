@@ -1,0 +1,428 @@
+{
+    "version":  1,
+    "semantics":  {
+                      "public":  "Operation is routed through the externally reachable Gateway API boundary; this label does not assert unauthenticated access. Per-operation authentication and authorization remain to be verified in contract work.",
+                      "internal":  "Microservice route is explicitly protected by the internal middleware, which validates a signed short-lived service context. Document as an internal contract; it is not excluded from contract work.",
+                      "technical":  "Infrastructure or operational endpoint verified from route and deployment configuration. Use only with route-specific evidence.",
+                      "excluded":  "Deliberately outside contract scope, with a specific rationale and evidence."
+                  },
+    "services":  {
+                     "gateway":  {
+                                     "rationale":  "services/gateway/routes/web.php: Route::prefix(api/v1); externally routable Gateway boundary. Public means boundary scope only, not anonymous access.",
+                                     "routes":  [
+                                                    {
+                                                        "operation":  "DELETE /conversations/{id}/messages",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "DELETE /conversations/{id}/messages/{messageId}",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "DELETE /folder-documents/{id}",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "DELETE /folders/{id}",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "DELETE /users/{id}/photos/avatar",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /contacts/{id}",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /conversations/{id}/calls/{callId}",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /conversations/{id}/calls/{callId}/signals",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /conversations/{id}/messages/{messageId}/attachment",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /conversations/{id}/pinned",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /conversations/{id}/search",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /folder-access",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /folder-documents",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /folder-documents/{id}/download",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /folder-documents/{id}/preview",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /folder-documents/search",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /folder-quota",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /folders",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /invitations/person/{id}/status",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /members/folder-readers",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /persons/export-jobs/{id}",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /persons/export-jobs/{id}/download",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /privacy-requests",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /system/privacy-erasures",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /system/services",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /users/{id}/photos",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /users/{id}/photos/avatar",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /voice-calls",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /voice-calls/ice-config",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "PATCH /folder-documents/{id}",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "PATCH /folders/{id}",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "PATCH /privacy-requests/{id}",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "POST /auth/{action}",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "POST /conversations/{id}/activity",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "POST /conversations/{id}/calls",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "POST /conversations/{id}/calls/{callId}/signal",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "POST /conversations/{id}/calls/{callId}/transition",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "POST /conversations/{id}/messages/{messageId}/pin",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "POST /folder-documents/{id}/move",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "POST /folders",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "POST /folders/{id}/move",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "POST /persons/export-jobs",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "POST /privacy-requests",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "POST /privacy-requests/{id}/execute-erasure",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "PUT /folder-access",
+                                                        "category":  "public"
+                                                    },
+                                                    {
+                                                        "operation":  "PUT /users/{id}/photos/avatar",
+                                                        "category":  "public"
+                                                    }
+                                                ]
+                                 },
+                     "identity":  {
+                                      "rationale":  "services/identity/routes/api.php: routes are in middleware(internal); shared packages/php/src/InternalAuth.php verifies signed service context.",
+                                      "routes":  [
+                                                     {
+                                                         "operation":  "GET /contacts/{id}",
+                                                         "category":  "internal"
+                                                     },
+                                                     {
+                                                         "operation":  "GET /invitations/person/{id}/status",
+                                                         "category":  "internal"
+                                                     },
+                                                     {
+                                                         "operation":  "GET /members/folder-readers",
+                                                         "category":  "internal"
+                                                     },
+                                                     {
+                                                         "operation":  "POST /members/folder-readers/verify",
+                                                         "category":  "internal"
+                                                     },
+                                                     {
+                                                         "operation":  "POST /persons/{id}/detach-for-erasure",
+                                                         "category":  "internal"
+                                                     },
+                                                     {
+                                                         "operation":  "POST /persons/{id}/self-photo-access",
+                                                         "category":  "internal"
+                                                     },
+                                                     {
+                                                         "operation":  "POST /users/{id}/photo-access",
+                                                         "category":  "internal"
+                                                     }
+                                                 ]
+                                  },
+                     "records":  {
+                                     "rationale":  "services/records/routes/api.php: routes are in middleware(internal); shared packages/php/src/InternalAuth.php verifies signed service context.",
+                                     "routes":  [
+                                                    {
+                                                        "operation":  "GET /persons/export-jobs/{id}",
+                                                        "category":  "internal"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /persons/export-jobs/{id}/download",
+                                                        "category":  "internal"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /privacy-erasure-status",
+                                                        "category":  "internal"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /privacy-requests",
+                                                        "category":  "internal"
+                                                    },
+                                                    {
+                                                        "operation":  "GET /public-logo/{id}",
+                                                        "category":  "internal"
+                                                    },
+                                                    {
+                                                        "operation":  "PATCH /privacy-requests/{id}",
+                                                        "category":  "internal"
+                                                    },
+                                                    {
+                                                        "operation":  "POST /persons/export-jobs",
+                                                        "category":  "internal"
+                                                    },
+                                                    {
+                                                        "operation":  "POST /privacy-requests",
+                                                        "category":  "internal"
+                                                    },
+                                                    {
+                                                        "operation":  "POST /privacy-requests/{id}/execute-erasure",
+                                                        "category":  "internal"
+                                                    }
+                                                ]
+                                 },
+                     "files":  {
+                                   "rationale":  "services/files/routes/api.php: routes are in middleware(internal), including photo context routes; shared packages/php/src/InternalAuth.php verifies signed service context.",
+                                   "routes":  [
+                                                  {
+                                                      "operation":  "DELETE /folder-documents/{id}",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "DELETE /folders/{id}",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "DELETE /users/{id}/photos/{slot}",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "GET /antivirus-status",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "GET /chat-attachments/{id}",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "GET /folder-access",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "GET /folder-documents",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "GET /folder-documents/{id}/download",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "GET /folder-documents/{id}/preview",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "GET /folder-documents/search",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "GET /folder-quota",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "GET /folders",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "GET /users/{id}/photos",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "GET /users/{id}/photos/{slot}",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "PATCH /folder-documents/{id}",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "PATCH /folders/{id}",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "POST /chat-attachments",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "POST /folder-documents/{id}/move",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "POST /folders",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "POST /folders/{id}/move",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "PUT /folder-access",
+                                                      "category":  "internal"
+                                                  },
+                                                  {
+                                                      "operation":  "PUT /users/{id}/photos/{slot}",
+                                                      "category":  "internal"
+                                                  }
+                                              ]
+                               },
+                     "chat":  {
+                                  "rationale":  "services/chat/routes/api.php: routes are in middleware(internal); shared packages/php/src/InternalAuth.php verifies signed service context.",
+                                  "routes":  [
+                                                 {
+                                                     "operation":  "DELETE /conversations/{id}/messages",
+                                                     "category":  "internal"
+                                                 },
+                                                 {
+                                                     "operation":  "DELETE /conversations/{id}/messages/{messageId}",
+                                                     "category":  "internal"
+                                                 },
+                                                 {
+                                                     "operation":  "GET /chat-attachment-references/{id}",
+                                                     "category":  "internal"
+                                                 },
+                                                 {
+                                                     "operation":  "GET /conversations/{conversationId}/calls/{callId}",
+                                                     "category":  "internal"
+                                                 },
+                                                 {
+                                                     "operation":  "GET /conversations/{conversationId}/calls/{callId}/signals",
+                                                     "category":  "internal"
+                                                 },
+                                                 {
+                                                     "operation":  "GET /conversations/{id}/messages/{messageId}/attachment",
+                                                     "category":  "internal"
+                                                 },
+                                                 {
+                                                     "operation":  "GET /conversations/{id}/pinned",
+                                                     "category":  "internal"
+                                                 },
+                                                 {
+                                                     "operation":  "GET /conversations/{id}/search",
+                                                     "category":  "internal"
+                                                 },
+                                                 {
+                                                     "operation":  "GET /voice-calls",
+                                                     "category":  "internal"
+                                                 },
+                                                 {
+                                                     "operation":  "POST /conversations/{conversationId}/calls",
+                                                     "category":  "internal"
+                                                 },
+                                                 {
+                                                     "operation":  "POST /conversations/{conversationId}/calls/{callId}/signal",
+                                                     "category":  "internal"
+                                                 },
+                                                 {
+                                                     "operation":  "POST /conversations/{conversationId}/calls/{callId}/transition",
+                                                     "category":  "internal"
+                                                 },
+                                                 {
+                                                     "operation":  "POST /conversations/{id}/activity",
+                                                     "category":  "internal"
+                                                 },
+                                                 {
+                                                     "operation":  "POST /conversations/{id}/messages/{messageId}/pin",
+                                                     "category":  "internal"
+                                                 }
+                                             ]
+                              }
+                 }
+}

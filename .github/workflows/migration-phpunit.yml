@@ -61,6 +61,11 @@ jobs:
       - name: Install service dev dependencies
         working-directory: services/${{ matrix.service }}
         run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Validate undocumented route classification inventory
+        if: matrix.service == 'gateway'
+        run: |
+          php tools/contracts/check-openapi-classification.php --self-test
+          php tools/contracts/check-openapi-classification.php contracts/undocumented-route-baseline.json contracts/route-classification.json
       - name: Validate service OpenAPI routes
         working-directory: services/${{ matrix.service }}
         shell: bash

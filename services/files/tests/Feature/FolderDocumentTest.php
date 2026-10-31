@@ -89,7 +89,17 @@ final class FolderDocumentTest extends TestCase {
   $this->app->instance(FolderDocumentStore::class,new FolderDocumentStore(new OfficeDocumentGate($scanner,$this->dir),$this->dir,100000,
    null,null,new PdfGate($scanner,$this->dir,$runner)));
   $bytes=$this->pdfBytes();$body=$this->body($bytes);$body['name']='Acta.pdf';
-  $this->internal('POST','folder-documents',$body,$this->p)->assertOk()->assertJsonPath('data.mime','application/pdf');
+  $response=$this->internal('POST','folder-documents',$body,$this->p)->assertOk()
+   ->assertJsonStructure(['data'=>['id','folder_id','name','mime','bytes','sha256','created_at','version']])
+   ->assertJsonPath('data.mime','application/pdf');
+  $metadata=$response->json('data');
+  $this->assertSame($body['id'],$metadata['id']);
+  $this->assertNull($metadata['folder_id']);
+  $this->assertSame('Acta.pdf',$metadata['name']);
+  $this->assertIsInt($metadata['bytes']);
+  $this->assertMatchesRegularExpression('/^[a-f0-9]{64}$/',$metadata['sha256']);
+  $this->assertIsString($metadata['created_at']);
+  $this->assertSame(1,$metadata['version']);
   $this->assertSame(1,$scanner->calls);
   $this->internal('GET','folder-documents/'.$body['id'].'/download',[],$this->p)->assertOk()
    ->assertJsonPath('data.content',base64_encode($bytes));

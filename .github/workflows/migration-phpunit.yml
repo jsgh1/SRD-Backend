@@ -66,6 +66,11 @@ jobs:
         run: |
           php tools/contracts/check-openapi-classification.php --self-test
           php tools/contracts/check-openapi-classification.php contracts/undocumented-route-baseline.json contracts/route-classification.json
+      - name: Validate OpenAPI response schema structure
+        if: matrix.service == 'gateway'
+        run: |
+          php tools/contracts/check-openapi-success-schemas.php --self-test
+          php tools/contracts/check-openapi-success-schemas.php
       - name: Validate service OpenAPI routes
         working-directory: services/${{ matrix.service }}
         shell: bash

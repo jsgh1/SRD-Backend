@@ -68,7 +68,15 @@ jobs:
           set -euo pipefail
           php ../../tools/contracts/check-openapi-routes.php --self-test
           php artisan route:list --json > "$RUNNER_TEMP/${{ matrix.service }}-routes.json"
-          php ../../tools/contracts/check-openapi-routes.php "../../contracts/${{ matrix.service }}.openapi.json" "$RUNNER_TEMP/${{ matrix.service }}-routes.json"
+          php ../../tools/contracts/check-openapi-routes.php "../../contracts/${{ matrix.service }}.openapi.json" "$RUNNER_TEMP/${{ matrix.service }}-routes.json" "../../contracts/undocumented-route-baseline.json"
+      - name: Publish Laravel route inventory artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: laravel-routes-${{ matrix.service }}
+          path: ${{ runner.temp }}/${{ matrix.service }}-routes.json
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Prepare per-service coverage output
         working-directory: services/${{ matrix.service }}
         run: mkdir -p coverage

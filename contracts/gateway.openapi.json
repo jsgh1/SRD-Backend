@@ -11691,10 +11691,25 @@
         "parameters": []
       }
     },
-    "/quick-links/organization": {
+    "/quick-links/{scope}": {
+      "parameters": [
+        {
+          "name": "scope",
+          "in": "path",
+          "required": true,
+          "description": "Ámbito de configuración que se actualiza.",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "organization",
+              "personal"
+            ]
+          }
+        }
+      ],
       "patch": {
-        "summary": "Guardar accesos comunes: SA/AD. Cambiar política común/personal: solo SA; AD recibe 403 si intenta cambiarla. Versión antigua: 409.",
-        "operationId": "patch_quick_links_organization",
+        "summary": "Actualizar la configuración de accesos comunes o personales",
+        "operationId": "patch_quick_links_scope",
         "security": [
           {
             "session": []
@@ -11816,7 +11831,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OrganizationQuickLinksWrite"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OrganizationQuickLinksWrite"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PersonalQuickLinksWrite"
+                  }
+                ]
               }
             }
           }
@@ -11830,151 +11852,9 @@
               "type": "string"
             },
             "description": "Obtener de /csrf; renovar tras /auth/verify y logout."
-          }
-        ]
-      }
-    },
-    "/quick-links/personal": {
-      "patch": {
-        "summary": "Guardar accesos propios o volver a heredar; requiere modo personal y versiones vigentes",
-        "operationId": "patch_quick_links_personal",
-        "security": [
-          {
-            "session": []
           }
         ],
-        "responses": {
-          "200": {
-            "description": "Resultado confirmado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "data",
-                    "meta"
-                  ],
-                  "properties": {
-                    "data": {},
-                    "meta": {
-                      "type": "object",
-                      "properties": {
-                        "correlation_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        }
-                      },
-                      "required": [
-                        "correlation_id"
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error normalizado 401",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error normalizado 403",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Error normalizado 404",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Error normalizado 409",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "419": {
-            "description": "Error normalizado 419",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Error normalizado 422",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Error normalizado 429",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Error normalizado 503",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PersonalQuickLinksWrite"
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "X-CSRF-TOKEN",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Obtener de /csrf; renovar tras /auth/verify y logout."
-          }
-        ]
+        "description": "Con scope=organization se envían version, items y, opcionalmente, mode. Con scope=personal se envían version, common_version, inherit e items. Los permisos y las versiones se validan en el servicio."
       }
     },
     "/platform/organizations": {

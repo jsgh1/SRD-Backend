@@ -91,10 +91,6 @@
                                                         "category":  "public"
                                                     },
                                                     {
-                                                        "operation":  "GET /system/services",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "GET /users/{id}/photos",
                                                         "category":  "public"
                                                     },

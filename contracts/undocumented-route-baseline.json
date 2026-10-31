@@ -23,7 +23,6 @@
                                      "GET /persons/export-jobs/{id}/download",
                                      "GET /privacy-requests",
                                      "GET /system/privacy-erasures",
-                                     "GET /system/services",
                                      "GET /users/{id}/photos",
                                      "GET /users/{id}/photos/avatar",
                                      "GET /voice-calls",

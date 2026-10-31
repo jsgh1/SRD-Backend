@@ -3506,6 +3506,138 @@
         ]
       }
     },
+    "/system/services": {
+      "get": {
+        "summary": "Estado de servicios y antivirus; solo superadministrador y administrador",
+        "description": "Consulta limitada a 10 solicitudes por minuto. Los fallos de sondeo se reflejan en available=false y no exponen direcciones internas. La disponibilidad del antivirus se informa por separado.",
+        "operationId": "get_system_services",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estado confirmado, incluso si uno o más sondeos fallan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "items",
+                        "antivirus_available",
+                        "checked_at"
+                      ],
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "minItems": 10,
+                          "maxItems": 10,
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "service",
+                              "available"
+                            ],
+                            "properties": {
+                              "service": {
+                                "type": "string",
+                                "enum": [
+                                  "identity",
+                                  "configuration",
+                                  "records",
+                                  "files",
+                                  "audit",
+                                  "calendar",
+                                  "notifications",
+                                  "treasury",
+                                  "inventory",
+                                  "chat"
+                                ]
+                              },
+                              "available": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        },
+                        "antivirus_available": {
+                          "type": "boolean"
+                        },
+                        "checked_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error normalizado 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error normalizado 403: requiere rol de superadministrador o administrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error normalizado 429: límite de consulta excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error normalizado 503: Gateway o contexto de sesión no disponible",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": []
+      }
+    },
     "/system/schedulers": {
       "get": {
         "summary": "Estado de los nueve planificadores y sus publicadores de auditoría; solo SA/AD",

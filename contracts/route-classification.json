@@ -127,10 +127,6 @@
                                                         "category":  "public"
                                                     },
                                                     {
-                                                        "operation":  "POST /conversations/{id}/activity",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "POST /conversations/{id}/calls",
                                                         "category":  "public"
                                                     },
@@ -380,10 +376,6 @@
                                                  },
                                                  {
                                                      "operation":  "POST /conversations/{conversationId}/calls/{callId}/transition",
-                                                     "category":  "internal"
-                                                 },
-                                                 {
-                                                     "operation":  "POST /conversations/{id}/activity",
                                                      "category":  "internal"
                                                  },
                                                  {

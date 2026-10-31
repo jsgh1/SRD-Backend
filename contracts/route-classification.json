@@ -47,10 +47,6 @@
                                                         "category":  "public"
                                                     },
                                                     {
-                                                        "operation":  "GET /conversations/{id}/pinned",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "GET /conversations/{id}/search",
                                                         "category":  "public"
                                                     },
@@ -388,10 +384,6 @@
                                                  },
                                                  {
                                                      "operation":  "GET /conversations/{id}/messages/{messageId}/attachment",
-                                                     "category":  "internal"
-                                                 },
-                                                 {
-                                                     "operation":  "GET /conversations/{id}/pinned",
                                                      "category":  "internal"
                                                  },
                                                  {

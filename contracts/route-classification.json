@@ -55,23 +55,11 @@
                                                         "category":  "public"
                                                     },
                                                     {
-                                                        "operation":  "GET /folder-documents",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "GET /folder-documents/{id}/download",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "GET /folder-documents/{id}/preview",
                                                         "category":  "public"
                                                     },
                                                     {
                                                         "operation":  "GET /folder-documents/search",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "GET /folder-quota",
                                                         "category":  "public"
                                                     },
                                                     {
@@ -294,23 +282,11 @@
                                                       "category":  "internal"
                                                   },
                                                   {
-                                                      "operation":  "GET /folder-documents",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
-                                                      "operation":  "GET /folder-documents/{id}/download",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
                                                       "operation":  "GET /folder-documents/{id}/preview",
                                                       "category":  "internal"
                                                   },
                                                   {
                                                       "operation":  "GET /folder-documents/search",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
-                                                      "operation":  "GET /folder-quota",
                                                       "category":  "internal"
                                                   },
                                                   {

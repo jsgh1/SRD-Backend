@@ -3,7 +3,7 @@
   "info": {
     "title": "SRD Gateway API",
     "version": "0.1.0",
-    "description": "Contrato del incremento implementado. Identidad nativa, archivos y otros dominios aún no expuestos. Cada éxito contiene data y meta. Listas contienen items/page/page_size/total dentro de data."
+    "description": "Contrato de las operaciones externas implementadas del Gateway, incluidas sesión, Carpeta y los dominios documentados. Cada operación define su propio formato de respuesta y los controles de acceso aplicables."
   },
   "servers": [
     {
@@ -10350,11 +10350,16 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["data", "meta"],
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
                   "properties": {
                     "data": {
                       "type": "object",
-                      "required": ["items"],
+                      "required": [
+                        "items"
+                      ],
                       "properties": {
                         "items": {
                           "type": "array",
@@ -10362,31 +10367,105 @@
                           "items": {
                             "type": "object",
                             "required": [
-                              "id", "sequence", "sender_id", "body", "reply_to_id", "system_kind",
-                              "call_duration_seconds", "pinned", "attachment", "created_at", "delivered_at", "read_at"
+                              "id",
+                              "sequence",
+                              "sender_id",
+                              "body",
+                              "reply_to_id",
+                              "system_kind",
+                              "call_duration_seconds",
+                              "pinned",
+                              "attachment",
+                              "created_at",
+                              "delivered_at",
+                              "read_at"
                             ],
                             "properties": {
-                              "id": { "type": "string", "format": "uuid" },
-                              "sequence": { "type": "integer", "minimum": 1 },
-                              "sender_id": { "type": "string", "format": "uuid" },
-                              "body": { "type": "string" },
-                              "reply_to_id": { "type": ["string", "null"], "format": "uuid" },
-                              "system_kind": { "type": ["string", "null"] },
-                              "call_duration_seconds": { "type": ["integer", "null"], "minimum": 0 },
-                              "pinned": { "type": "boolean", "const": true },
+                              "id": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "sequence": {
+                                "type": "integer",
+                                "minimum": 1
+                              },
+                              "sender_id": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "body": {
+                                "type": "string"
+                              },
+                              "reply_to_id": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "format": "uuid"
+                              },
+                              "system_kind": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "call_duration_seconds": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ],
+                                "minimum": 0
+                              },
+                              "pinned": {
+                                "type": "boolean",
+                                "const": true
+                              },
                               "attachment": {
-                                "type": ["object", "null"],
-                                "required": ["id", "name", "mime", "bytes"],
+                                "type": [
+                                  "object",
+                                  "null"
+                                ],
+                                "required": [
+                                  "id",
+                                  "name",
+                                  "mime",
+                                  "bytes"
+                                ],
                                 "properties": {
-                                  "id": { "type": "string", "format": "uuid" },
-                                  "name": { "type": "string" },
-                                  "mime": { "type": "string" },
-                                  "bytes": { "type": "integer", "minimum": 0 }
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "mime": {
+                                    "type": "string"
+                                  },
+                                  "bytes": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                  }
                                 }
                               },
-                              "created_at": { "type": "string", "format": "date-time" },
-                              "delivered_at": { "type": ["string", "null"], "format": "date-time" },
-                              "read_at": { "type": ["string", "null"], "format": "date-time" }
+                              "created_at": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "delivered_at": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "format": "date-time"
+                              },
+                              "read_at": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "format": "date-time"
+                              }
                             }
                           }
                         }
@@ -10394,8 +10473,15 @@
                     },
                     "meta": {
                       "type": "object",
-                      "required": ["correlation_id"],
-                      "properties": { "correlation_id": { "type": "string", "format": "uuid" } }
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
                     }
                   }
                 }
@@ -10404,19 +10490,43 @@
           },
           "401": {
             "description": "Authentication is required.",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "404": {
             "description": "Conversation not found for the signed-in participant.",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "429": {
             "description": "Rate limit exceeded.",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "503": {
             "description": "Chat service is unavailable.",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -10968,6 +11078,115 @@
           },
           "507": {
             "description": "Cuota insuficiente"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "listFolderDocuments",
+        "summary": "Listar documentos de Carpeta",
+        "description": "Lista únicamente documentos listos y no eliminados en la junta de la sesión. La sesión debe tener permiso de lectura para la carpeta.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "folder_id",
+            "in": "query",
+            "required": false,
+            "description": "Filtra por carpeta. Omitirlo selecciona la raíz.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Página de 25 documentos; comienza en 1.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000,
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderDocumentListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "El contexto de acceso no es válido o la sesión no está autenticada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no tiene permiso para esta operación o carpeta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No se encontró la carpeta o el documento en la junta activa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Los parámetros no cumplen las reglas de validación.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Se alcanzó el límite temporal de solicitudes del gateway.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Files o un componente necesario no está disponible; el contenido no pudo verificarse.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -19519,6 +19738,162 @@
           }
         }
       }
+    },
+    "/folder-documents/{id}/download": {
+      "get": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "downloadFolderDocument",
+        "summary": "Descargar un documento privado",
+        "description": "Devuelve metadatos y contenido original en base64. El documento debe pertenecer a la junta activa y la sesión debe tener permiso de lectura.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identificador UUID del documento.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderDocumentDownloadResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "El contexto de acceso no es válido o la sesión no está autenticada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no tiene permiso para esta operación o carpeta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No se encontró la carpeta o el documento en la junta activa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Se alcanzó el límite temporal de solicitudes del gateway.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Files o un componente necesario no está disponible; el contenido no pudo verificarse.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/folder-quota": {
+      "get": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "readFolderQuota",
+        "summary": "Consultar el espacio de Carpeta",
+        "description": "Devuelve bytes reservados, el límite y el espacio disponible en la junta de la sesión. Requiere permiso para administrar Carpeta.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderQuotaResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "El contexto de acceso no es válido o la sesión no está autenticada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no tiene permiso para esta operación o carpeta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Se alcanzó el límite temporal de solicitudes del gateway.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Files o un componente necesario no está disponible; el contenido no pudo verificarse.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -21510,6 +21885,151 @@
           "inherit",
           "items"
         ]
+      },
+      "FolderDocumentMetadata": {
+        "type": "object",
+        "required": [
+          "id",
+          "folder_id",
+          "name",
+          "mime",
+          "bytes",
+          "sha256",
+          "created_at",
+          "version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "folder_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "mime": {
+            "type": "string"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20971520
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "FolderDocumentListResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "items",
+              "total",
+              "page_size",
+              "page"
+            ],
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FolderDocumentMetadata"
+                }
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "page_size": {
+                "type": "integer",
+                "const": 25
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        }
+      },
+      "FolderDocumentDownloadResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FolderDocumentMetadata"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "content"
+                ],
+                "properties": {
+                  "content": {
+                    "type": "string",
+                    "contentEncoding": "base64",
+                    "maxLength": 27962028,
+                    "description": "Contenido original codificado en base64."
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "FolderQuotaResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "used_bytes",
+              "limit_bytes",
+              "available_bytes"
+            ],
+            "properties": {
+              "used_bytes": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "limit_bytes": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "available_bytes": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
       }
     }
   }

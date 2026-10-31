@@ -716,6 +716,121 @@
         ]
       }
     },
+    "/conversations/{id}/pinned": {
+      "get": {
+        "summary": "List up to 25 pinned messages visible to the conversation participant.",
+        "operationId": "get_conversations__id__pinned",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pinned messages visible to the authenticated participant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "items"
+                      ],
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "maxItems": 25,
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "id",
+                              "sequence",
+                              "sender_id",
+                              "body",
+                              "reply_to_id",
+                              "system_kind",
+                              "call_duration_seconds",
+                              "pinned",
+                              "attachment",
+                              "created_at",
+                              "delivered_at",
+                              "read_at"
+                            ],
+                            "properties": {
+                              "id": { "type": "string", "format": "uuid" },
+                              "sequence": { "type": "integer", "minimum": 1 },
+                              "sender_id": { "type": "string", "format": "uuid" },
+                              "body": { "type": "string" },
+                              "reply_to_id": { "type": ["string", "null"], "format": "uuid" },
+                              "system_kind": { "type": ["string", "null"] },
+                              "call_duration_seconds": { "type": ["integer", "null"], "minimum": 0 },
+                              "pinned": { "type": "boolean", "const": true },
+                              "attachment": {
+                                "type": ["object", "null"],
+                                "required": ["id", "name", "mime", "bytes"],
+                                "properties": {
+                                  "id": { "type": "string", "format": "uuid" },
+                                  "name": { "type": "string" },
+                                  "mime": { "type": "string" },
+                                  "bytes": { "type": "integer", "minimum": 0 }
+                                }
+                              },
+                              "created_at": { "type": "string", "format": "date-time" },
+                              "delivered_at": { "type": ["string", "null"], "format": "date-time" },
+                              "read_at": { "type": ["string", "null"], "format": "date-time" }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": ["correlation_id"],
+                      "properties": {
+                        "correlation_id": { "type": "string", "format": "uuid" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication context is missing or invalid.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          },
+          "404": {
+            "description": "Conversation not found for the authenticated participant.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          },
+          "429": {
+            "description": "Rate limit exceeded.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          },
+          "503": {
+            "description": "Chat service is unavailable.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          }
+        }
+      }
+    },
     "/conversations/{id}/receipts": {
       "post": {
         "summary": "Confirmar recepción o lectura de mensajes concretos por el destinatario; lectura exige visibilidad real en el cliente",

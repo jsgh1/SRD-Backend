@@ -2738,6 +2738,140 @@
           }
         }
       }
+    },
+    "/conversations/{conversationId}/calls/{callId}/transition": {
+      "post": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "post_conversations__conversationId__calls__callId__transition",
+        "summary": "Cambiar el estado de una llamada de voz",
+        "description": "Ruta interna protegida por X-SRD-Context firmado. Acepta unicamente contexto vigente emitido por Gateway, ligado al metodo, ruta y cuerpo, con nonce de un solo uso. Requiere permiso chat.read y que la junta, conversacion, usuario y llamada correspondan a un participante. accept/reject solo puede ejecutarlo la persona llamada mientras ringing; end/fail solo pueden ejecutarlo participantes mientras ringing o accepted. Las acciones terminales registran el resultado en el chat y eliminan las senales privadas de la llamada.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la conversacion.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "callId",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la llamada.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "action"
+                ],
+                "description": "accept/reject solo son validos para la persona llamada mientras el estado es ringing. end/fail requieren una llamada ringing o accepted y pueden ejecutarlos sus participantes.",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "accept",
+                      "reject",
+                      "end",
+                      "fail"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transicion aplicada; devuelve el estado y los identificadores de la llamada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceCallDetailResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado invalido, vencido o reutilizado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Emisor o permiso chat.read no autorizado, o accept/reject ejecutado por quien inicio la llamada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversacion o llamada fuera de la junta o no accesible para el participante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Accion incompatible con el estado actual; accept/reject requiere ringing y end/fail requiere una llamada activa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Accion requerida o no incluida en accept, reject, end, fail.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error inesperado al procesar la transicion.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

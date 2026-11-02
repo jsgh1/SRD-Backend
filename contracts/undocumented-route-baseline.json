@@ -7,7 +7,6 @@
                                      "GET /system/privacy-erasures",
                                      "PATCH /privacy-requests/{id}",
                                      "POST /auth/{action}",
-                                     "POST /conversations/{id}/calls/{callId}/transition",
                                      "POST /privacy-requests",
                                      "POST /privacy-requests/{id}/execute-erasure"
                                  ],
@@ -46,8 +45,7 @@
 
                                    ],
                      "chat":  [
-                                  "GET /chat-attachment-references/{id}",
-                                  "POST /conversations/{conversationId}/calls/{callId}/transition"
+                                  "GET /chat-attachment-references/{id}"
                               ]
                  }
 }

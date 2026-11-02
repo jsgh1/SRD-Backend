@@ -30,14 +30,6 @@
                                                      {
                                                          "operation":  "POST /persons/{id}/detach-for-erasure",
                                                          "category":  "internal"
-                                                     },
-                                                     {
-                                                         "operation":  "POST /persons/{id}/self-photo-access",
-                                                         "category":  "internal"
-                                                     },
-                                                     {
-                                                         "operation":  "POST /users/{id}/photo-access",
-                                                         "category":  "internal"
                                                      }
                                                  ]
                                   },

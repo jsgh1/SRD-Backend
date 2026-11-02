@@ -4715,6 +4715,250 @@
           }
         }
       }
+    },
+    "/persons/{id}/self-photo-access": {
+      "post": {
+        "summary": "Autorizar la edición de la foto de la propia persona vinculada",
+        "description": "Endpoint interno. InternalAuth valida el contexto firmado para audiencia Identity; el controlador exige emisor records. Se exige persons.read y un principal con user_id, organization_id y session_id. La sesión debe corresponder al mismo usuario y junta, no estar revocada, no estar vencida y haber tenido actividad en los últimos 30 minutos. Además, debe existir una membresía activa que vincule ese usuario con la persona indicada y la cuenta debe estar activa. Una sesión, membresía, cuenta o vínculo inválidos produce 403. No consulta ni devuelve datos personales: solo autoriza la operación del llamador Records. El UUID se interpreta dentro de la junta del principal. No hay cuerpo de solicitud.",
+        "operationId": "internal_post_person_self_photo_access",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la persona vinculada al usuario y a la junta del contexto firmado.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "La sesión reciente y el vínculo activo permiten editar la foto de la persona propia.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "authorized"
+                      ],
+                      "properties": {
+                        "authorized": {
+                          "type": "boolean",
+                          "const": true
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "El contexto interno es ausente, inválido o no confiable. El emisor files no está autorizado por el middleware para esta ruta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El emisor no es Records, falta persons.read o session_id, la sesión no coincide/no está vigente/no es reciente, o no existe un vínculo activo de la cuenta con esa persona en la junta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El UUID de la persona no cumple la restricción de ruta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error inesperado al consultar la sesión o el vínculo de membresía.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}/photo-access": {
+      "post": {
+        "summary": "Autorizar lectura de foto de contacto o escritura de foto propia",
+        "description": "Endpoint interno consumido por Files. InternalAuth permite issuer files para esta ruta exacta, audiencia Identity, método POST y UUID en la ruta; el controlador vuelve a exigir emisor files. Requiere la acción contacts.read o profile.write y un principal firmado con user_id, organization_id y rol reconocido. El actor y el destino deben ser cuentas activas con un rol efectivo en la junta del principal: las cuentas regulares requieren membresía activa en esa junta; SessionService considera a una cuenta global superadmin activa como superadmin en cualquier junta sin fila de membresía. Ese comportamiento global está implementado pero no tiene una prueba dedicada de aislamiento y se deja como brecha de verificación de política. contacts.read autoriza la lectura del destino visible para Files. profile.write solo autoriza cuando id es el user_id del principal; no autoriza cambiar la foto de otra cuenta. El endpoint no consulta auth_sessions: confía en el principal firmado que Files recibe del flujo Gateway. Solo devuelve la decisión y no expone datos de cuenta. El cuerpo contiene exactamente el campo funcional action; el código actual no rechaza propiedades adicionales.",
+        "operationId": "internal_post_user_photo_access",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la cuenta cuya foto Files pretende consultar o modificar.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "action"
+                ],
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "contacts.read",
+                      "profile.write"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "El actor y el destino tienen una cuenta/rol activo y la acción está autorizada; profile.write solo funciona sobre el propio id.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "authorized"
+                      ],
+                      "properties": {
+                        "authorized": {
+                          "type": "boolean",
+                          "const": true
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "El contexto firmado es inválido o no se admite el emisor Files para método/ruta/audiencia.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El emisor no es Files, el principal carece de organización/usuario/rol válido o profile.write apunta a otra cuenta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El UUID de la ruta es inválido, no existe el actor/destino, la cuenta está inactiva o un usuario regular no tiene membresía activa en la junta. Una cuenta global superadmin activa es la excepción explícita de SessionService.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "action es obligatorio y debe ser contacts.read o profile.write.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error inesperado al consultar cuentas o membresías.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

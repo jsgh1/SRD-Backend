@@ -8,9 +8,7 @@
                                      "POST /privacy-requests/{id}/execute-erasure"
                                  ],
                      "identity":  [
-                                      "POST /persons/{id}/detach-for-erasure",
-                                      "POST /persons/{id}/self-photo-access",
-                                      "POST /users/{id}/photo-access"
+                                      "POST /persons/{id}/detach-for-erasure"
                                   ],
                      "configuration":  [
 

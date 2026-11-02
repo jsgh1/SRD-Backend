@@ -238,11 +238,6 @@
                                                     }
                                                 ]
                                  },
-                     "files":  {
-                                   "rationale":  "services/files/routes/api.php: routes are in middleware(internal), including photo context routes; shared packages/php/src/InternalAuth.php verifies signed service context.",
-                                   "routes":  [
-                                              ]
-                               },
                      "chat":  {
                                   "rationale":  "services/chat/routes/api.php: routes are in middleware(internal); shared packages/php/src/InternalAuth.php verifies signed service context.",
                                   "routes":  [

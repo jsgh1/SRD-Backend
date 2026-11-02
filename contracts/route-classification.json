@@ -31,14 +31,6 @@
                                                         "category":  "public"
                                                     },
                                                     {
-                                                        "operation":  "GET /persons/export-jobs/{id}",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "GET /persons/export-jobs/{id}/download",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "GET /privacy-requests",
                                                         "category":  "public"
                                                     },
@@ -68,10 +60,6 @@
                                                     },
                                                     {
                                                         "operation":  "POST /conversations/{id}/messages/{messageId}/pin",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "POST /persons/export-jobs",
                                                         "category":  "public"
                                                     },
                                                     {
@@ -117,14 +105,6 @@
                                      "rationale":  "services/records/routes/api.php: routes are in middleware(internal); shared packages/php/src/InternalAuth.php verifies signed service context.",
                                      "routes":  [
                                                     {
-                                                        "operation":  "GET /persons/export-jobs/{id}",
-                                                        "category":  "internal"
-                                                    },
-                                                    {
-                                                        "operation":  "GET /persons/export-jobs/{id}/download",
-                                                        "category":  "internal"
-                                                    },
-                                                    {
                                                         "operation":  "GET /privacy-erasure-status",
                                                         "category":  "internal"
                                                     },
@@ -138,10 +118,6 @@
                                                     },
                                                     {
                                                         "operation":  "PATCH /privacy-requests/{id}",
-                                                        "category":  "internal"
-                                                    },
-                                                    {
-                                                        "operation":  "POST /persons/export-jobs",
                                                         "category":  "internal"
                                                     },
                                                     {

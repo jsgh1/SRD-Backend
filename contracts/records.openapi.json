@@ -2243,6 +2243,506 @@
         ]
       }
     },
+    "/persons/export-jobs": {
+      "post": {
+        "summary": "Solicitar exportaci?n as?ncrona de m?s de 500 personas",
+        "description": "Usa los filtros de consulta de la exportaci?n de personas. El servidor captura una instant?nea al crear el trabajo. Las solicitudes con 500 filas o menos se rechazan con 422. La consulta del trabajo y la descarga quedan limitadas a la junta y al usuario que lo cre?.",
+        "operationId": "post_persons_export_jobs",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trabajo agregado a la cola.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PersonExportJobAccepted"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesi?n o contexto interno ausente o inv?lido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El usuario no tiene permiso para exportar personas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Filtros u opciones inv?lidos, l?mite de tama?o no alcanzado, o ticket con formato inv?lido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Records no est? disponible temporalmente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "document_type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "RC",
+                "TI",
+                "CC",
+                "CE",
+                "NIT"
+              ]
+            }
+          },
+          {
+            "name": "gender",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "male",
+                "female",
+                "other"
+              ]
+            }
+          },
+          {
+            "name": "descriptive_role",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "admin",
+                "registrar",
+                "treasurer",
+                "auditor",
+                "viewer"
+              ]
+            },
+            "description": "Rol de la ficha; no representa permisos de cuenta."
+          },
+          {
+            "name": "position_code",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 60,
+              "pattern": "^[a-z0-9-]+$"
+            },
+            "description": "Código del catálogo de la junta activa, incluidos cargos inactivos. Todos los filtros se combinan con AND."
+          },
+          {
+            "name": "birth_date_from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Fecha inicial de nacimiento YYYY-MM-DD; requiere birth_date_to. Extremos inclusivos."
+          },
+          {
+            "name": "birth_date_to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Fecha final de nacimiento YYYY-MM-DD; requiere birth_date_from y no puede ser anterior."
+          },
+          {
+            "name": "registered_from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Día inicial de registro en America/Bogota YYYY-MM-DD; requiere registered_to. Extremos inclusivos."
+          },
+          {
+            "name": "registered_to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Día final de registro en America/Bogota YYYY-MM-DD; requiere registered_from y no puede ser anterior. El servidor convierte el límite final a UTC del día siguiente."
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "zone",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "affiliated",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "custom_filters",
+            "in": "query",
+            "description": "Hasta tres criterios combinados con AND. Codificar custom_filters[0][field_id] y [value] (índices 0..2). operator omitido o eq: coincidencia exacta, sin value_to. between: solo fechas ISO YYYY-MM-DD, value inicial y value_to final obligatorios, extremos inclusivos y ordenados. UUID de campo de la junta; campos y opciones inactivos admitidos. Números exactos comparados como cadenas, 1 difiere de 1.0.",
+            "schema": {
+              "type": "array",
+              "maxItems": 3,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "field_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "operator": {
+                    "type": "string",
+                    "enum": [
+                      "eq",
+                      "between"
+                    ]
+                  },
+                  "value_to": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                },
+                "required": [
+                  "field_id",
+                  "value"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          {
+            "name": "filename",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            },
+            "description": "Nombre opcional del archivo; se sanea y recibe extensi?n .xlsx o .pdf seg?n format. Si se omite, el sistema genera un nombre con la fecha de Colombia."
+          },
+          {
+            "name": "confirm_filename",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Debe ser true/1 cuando filename contiene texto."
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "xlsx",
+                "pdf"
+              ],
+              "default": "xlsx"
+            },
+            "description": "Formato del archivo generado en segundo plano."
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "es",
+                "en"
+              ],
+              "default": "es"
+            },
+            "description": "Idioma de los encabezados del archivo."
+          }
+        ]
+      }
+    },
+    "/persons/export-jobs/{id}": {
+      "get": {
+        "summary": "Consultar estado de una exportaci?n as?ncrona",
+        "description": "Solo el usuario de la misma junta que cre? el trabajo puede consultarlo. Cuando el archivo est? listo y a?n vigente, la respuesta incluye un ticket de descarga v?lido durante 15 minutos. El archivo expira despu?s de 24 horas.",
+        "operationId": "get_persons_export_jobs__id_",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estado y metadatos del trabajo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PersonExportJob"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesi?n o contexto interno ausente o inv?lido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El usuario no tiene permiso para exportar personas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Trabajo inexistente, fuera de la junta o del usuario, vencido, o ticket inv?lido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Records no est? disponible temporalmente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/persons/export-jobs/{id}/download": {
+      "get": {
+        "summary": "Descargar el archivo de una exportaci?n as?ncrona",
+        "description": "Requiere el ticket emitido por la consulta del trabajo. El ticket est? firmado para la junta y el usuario creador, vence en 15 minutos y solo permite descargar el archivo mientras siga vigente (hasta 24 horas desde que se gener?). La respuesta entrega el contenido codificado en base64 dentro de JSON. Los trabajos PDF antiguos pueden conservar la respuesta JSON con fecha, encabezados y filas; los nuevos devuelven el PDF en base64.",
+        "operationId": "get_persons_export_jobs__id__download",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Archivo XLSX o PDF codificado en base64.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/PersonExportJobDownload"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesi?n o contexto interno ausente o inv?lido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El usuario no tiene permiso para exportar personas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Trabajo inexistente, fuera de la junta o del usuario, vencido, o ticket inv?lido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Filtros u opciones inv?lidos, l?mite de tama?o no alcanzado, o ticket con formato inv?lido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Records no est? disponible temporalmente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "ticket",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{10}\\.[0-9a-f]{64}$"
+            },
+            "description": "Ticket temporal devuelto por GET /persons/export-jobs/{id}."
+          }
+        ]
+      }
+    },
     "/persons/planilla": {
       "get": {
         "summary": "Planilla XLSX de firmas con cinco columnas fijas y hasta cinco opcionales",
@@ -6872,6 +7372,180 @@
           "common_version",
           "inherit",
           "items"
+        ]
+      },
+      "PersonExportJobAccepted": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "const": "queued"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "xlsx",
+              "pdf"
+            ]
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 501
+          },
+          "cutoff_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "format",
+          "count",
+          "cutoff_at"
+        ]
+      },
+      "PersonExportJob": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "processing",
+              "ready",
+              "failed",
+              "expired"
+            ]
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "xlsx",
+              "pdf"
+            ]
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 501
+          },
+          "cutoff_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "filename": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "ticket": {
+            "type": "string",
+            "pattern": "^[0-9]{10}\\.[0-9a-f]{64}$",
+            "description": "Solo se incluye cuando el archivo est? listo y vigente. Caduca en 15 minutos."
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "format",
+          "count",
+          "cutoff_at",
+          "filename"
+        ]
+      },
+      "PersonExportJobFile": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "filename": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._ -]{0,119}\\.(xlsx|pdf)$"
+          },
+          "mime": {
+            "type": "string",
+            "enum": [
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+              "application/pdf"
+            ]
+          },
+          "content": {
+            "type": "string",
+            "contentEncoding": "base64"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 501
+          }
+        },
+        "required": [
+          "filename",
+          "mime",
+          "content",
+          "count"
+        ]
+      },
+      "PersonExportJobLegacyPdf": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Formato JSON preservado por trabajos PDF creados antes de la generaci?n binaria actual.",
+        "properties": {
+          "filename": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._ -]{0,119}\\.pdf$"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "headers": {
+            "type": "array",
+            "minItems": 12,
+            "maxItems": 12,
+            "items": {
+              "type": "string"
+            }
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12,
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 501
+          }
+        },
+        "required": [
+          "filename",
+          "date",
+          "headers",
+          "rows",
+          "count"
+        ]
+      },
+      "PersonExportJobDownload": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PersonExportJobFile"
+          },
+          {
+            "$ref": "#/components/schemas/PersonExportJobLegacyPdf"
+          }
         ]
       }
     },

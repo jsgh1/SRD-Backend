@@ -20953,6 +20953,939 @@
           }
         ]
       }
+    },
+    "/folder-documents/{id}": {
+      "delete": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "deleteFolderDocumentGateway",
+        "summary": "Marcar documento para eliminación diferida",
+        "description": "Sesión autenticada de Gateway requerida; para escrituras se exige protección CSRF y autorización en Files. Requiere permiso de escritura de Carpeta y confirm=true; compara versión. Devuelve marcador de eliminación; el blob y su cuota permanecen hasta que el colector procese la eliminación segura.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID del documento dentro de la junta activa.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "version",
+                  "confirm"
+                ],
+                "properties": {
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483646
+                  },
+                  "confirm": {
+                    "type": "boolean",
+                    "const": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderDocumentDeletedResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado inválido o sesión no autenticada."
+          },
+          "403": {
+            "description": "Emisor, contexto de junta o permiso insuficiente."
+          },
+          "404": {
+            "description": "Documento o carpeta no encontrados dentro de la junta activa."
+          },
+          "409": {
+            "description": "Conflicto de versión o de estado del documento."
+          },
+          "413": {
+            "description": "Cuerpo de solicitud por encima de 4096 bytes."
+          },
+          "422": {
+            "description": "Parámetros, versión, permisos delegados o nombre inválidos."
+          },
+          "429": {
+            "description": "Límite de solicitudes del Gateway alcanzado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "renameFolderDocumentGateway",
+        "summary": "Renombrar documento con concurrencia optimista",
+        "description": "Sesión autenticada de Gateway requerida; para escrituras se exige protección CSRF y autorización en Files. Requiere permiso de escritura de Carpeta. Verifica versión y nombre (debe conservar la extensión según MIME) antes de actualizar; si no cambia el nombre retorna metadatos sin nueva versión.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID del documento dentro de la junta activa.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "version"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483646
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderDocumentMutationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado inválido o sesión no autenticada."
+          },
+          "403": {
+            "description": "Emisor, contexto de junta o permiso insuficiente."
+          },
+          "404": {
+            "description": "Documento o carpeta no encontrados dentro de la junta activa."
+          },
+          "409": {
+            "description": "Conflicto de versión o de estado del documento."
+          },
+          "413": {
+            "description": "Cuerpo de solicitud por encima de 4096 bytes."
+          },
+          "422": {
+            "description": "Parámetros, versión, permisos delegados o nombre inválidos."
+          },
+          "429": {
+            "description": "Límite de solicitudes del Gateway alcanzado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}/photos/avatar": {
+      "delete": {
+        "summary": "Eliminar avatar de usuario con confirmación y versión",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "confirmed",
+                  "version"
+                ],
+                "properties": {
+                  "confirmed": {
+                    "const": true
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483647
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación confirmada; Cache-Control: no-store",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "slot",
+                        "version",
+                        "present",
+                        "size",
+                        "width",
+                        "height"
+                      ],
+                      "properties": {
+                        "slot": {
+                          "type": "string",
+                          "enum": [
+                            "avatar"
+                          ]
+                        },
+                        "version": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "present": {
+                          "type": "boolean"
+                        },
+                        "size": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "width": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "height": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Firma inválida"
+          },
+          "403": {
+            "description": "Emisor, contexto o permiso inválido"
+          },
+          "404": {
+            "description": "Recurso no disponible"
+          },
+          "409": {
+            "description": "Versión en conflicto"
+          },
+          "413": {
+            "description": "Solicitud mayor de 7 MiB"
+          },
+          "422": {
+            "description": "Datos o imagen inválidos"
+          },
+          "429": {
+            "description": "Límite de solicitudes del Gateway alcanzado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Dependencia o antivirus no disponible"
+          },
+          "507": {
+            "description": "Cuota insuficiente"
+          }
+        },
+        "description": "Sesión autenticada de Gateway requerida; para escrituras se exige protección CSRF y autorización en Files. Requiere profile.write, confirmed=true y versión vigente. Actualiza marcador sin contenido y difiere la eliminación del blob de forma segura. La ruta pública fija la posición `avatar` (no tiene parámetro slot).",
+        "tags": [
+          "Fotografías de usuario"
+        ],
+        "operationId": "deleteUserAvatarGateway"
+      },
+      "get": {
+        "summary": "Consultar avatar privado de usuario",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación confirmada; Cache-Control: no-store",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "content",
+                        "mime",
+                        "version"
+                      ],
+                      "properties": {
+                        "content": {
+                          "type": "string",
+                          "contentEncoding": "base64"
+                        },
+                        "mime": {
+                          "const": "image/png"
+                        },
+                        "version": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Firma inválida"
+          },
+          "403": {
+            "description": "Emisor, contexto o permiso inválido"
+          },
+          "404": {
+            "description": "Recurso no disponible"
+          },
+          "409": {
+            "description": "Versión en conflicto"
+          },
+          "413": {
+            "description": "Solicitud mayor de 7 MiB"
+          },
+          "422": {
+            "description": "Datos o imagen inválidos"
+          },
+          "429": {
+            "description": "Límite de solicitudes del Gateway alcanzado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Dependencia o antivirus no disponible"
+          },
+          "507": {
+            "description": "Cuota insuficiente"
+          }
+        },
+        "description": "Sesión autenticada de Gateway requerida; para escrituras se exige protección CSRF y autorización en Files. Requiere contacts.read y contexto de la sesión. Retorna imagen PNG normalizada en base64; slot solo admite avatar. La ruta pública fija la posición `avatar` (no tiene parámetro slot).",
+        "tags": [
+          "Fotografías de usuario"
+        ],
+        "operationId": "readUserAvatarGateway"
+      },
+      "put": {
+        "summary": "Crear o reemplazar avatar de usuario con versión",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "content",
+                  "version"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 255
+                  },
+                  "content": {
+                    "type": "string",
+                    "maxLength": 6990508,
+                    "contentEncoding": "base64",
+                    "description": "Base64 canónico sin espacios. JPEG, PNG o WebP; máximo 5 MiB y 20 millones de píxeles."
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2147483647
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación confirmada; Cache-Control: no-store",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "slot",
+                        "version",
+                        "present",
+                        "size",
+                        "width",
+                        "height"
+                      ],
+                      "properties": {
+                        "slot": {
+                          "type": "string",
+                          "enum": [
+                            "avatar"
+                          ]
+                        },
+                        "version": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "present": {
+                          "type": "boolean"
+                        },
+                        "size": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "width": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "height": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Firma inválida"
+          },
+          "403": {
+            "description": "Emisor, contexto o permiso inválido"
+          },
+          "404": {
+            "description": "Recurso no disponible"
+          },
+          "409": {
+            "description": "Versión en conflicto"
+          },
+          "413": {
+            "description": "Solicitud mayor de 7 MiB"
+          },
+          "422": {
+            "description": "Datos o imagen inválidos"
+          },
+          "429": {
+            "description": "Límite de solicitudes del Gateway alcanzado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Dependencia o antivirus no disponible"
+          },
+          "507": {
+            "description": "Cuota insuficiente"
+          }
+        },
+        "description": "Sesión autenticada de Gateway requerida; para escrituras se exige protección CSRF y autorización en Files. Requiere profile.write, versión esperada, foto JPEG/PNG/WebP de hasta 5 MiB y validación de seguridad. El servicio publica evento y controla cuota. La ruta pública fija la posición `avatar` (no tiene parámetro slot).",
+        "tags": [
+          "Fotografías de usuario"
+        ],
+        "operationId": "putUserAvatarGateway"
+      }
+    },
+    "/folder-documents/{id}/preview": {
+      "get": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "previewFolderDocumentGateway",
+        "summary": "Obtener vista previa segura de un documento privado",
+        "description": "Sesión autenticada de Gateway requerida; para escrituras se exige protección CSRF y autorización en Files. Requiere lectura autorizada dentro de la junta; lee el documento verificando SHA-256, elimina content del resultado y devuelve preview limitado. El parámetro page solo aplica a PDF; sheet solo a hojas de cálculo. Errores del extractor y de herramientas locales se devuelven como fallo de dependencia.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Identificador UUID del recurso."
+          },
+          {
+            "name": "sheet",
+            "in": "query",
+            "required": false,
+            "description": "Hoja del archivo XLSX (1–32); inválido para PDF.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 32
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Página PDF (1–1000); inválida para otro tipo.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderDocumentPreviewResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado no válido."
+          },
+          "403": {
+            "description": "Emisor, junta, sesión o permiso no autorizado."
+          },
+          "404": {
+            "description": "Recurso no encontrado o no accesible desde la junta actual."
+          },
+          "422": {
+            "description": "Nombre, tipo, contenido, versión u otro parámetro inválido."
+          },
+          "429": {
+            "description": "Límite de solicitudes del Gateway alcanzado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Archivo, procesador o dependencia de seguridad no disponible."
+          }
+        }
+      }
+    },
+    "/users/{id}/photos": {
+      "get": {
+        "summary": "Consultar el estado de fotografía de avatar de usuario",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación confirmada; Cache-Control: no-store",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "slot",
+                              "version",
+                              "present",
+                              "size",
+                              "width",
+                              "height"
+                            ],
+                            "properties": {
+                              "slot": {
+                                "type": "string",
+                                "enum": [
+                                  "avatar"
+                                ]
+                              },
+                              "version": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "present": {
+                                "type": "boolean"
+                              },
+                              "size": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "width": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ]
+                              },
+                              "height": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "items"
+                      ]
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Firma inválida"
+          },
+          "403": {
+            "description": "Emisor, contexto o permiso inválido"
+          },
+          "404": {
+            "description": "Recurso no disponible"
+          },
+          "409": {
+            "description": "Versión en conflicto"
+          },
+          "413": {
+            "description": "Solicitud mayor de 7 MiB"
+          },
+          "422": {
+            "description": "Datos o imagen inválidos"
+          },
+          "429": {
+            "description": "Límite de solicitudes del Gateway alcanzado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Dependencia o antivirus no disponible"
+          },
+          "507": {
+            "description": "Cuota insuficiente"
+          }
+        },
+        "description": "Sesión autenticada de Gateway requerida; para escrituras se exige protección CSRF y autorización en Files. Gateway con contexto de la sesión, permiso contacts.read y verificación de la junta. La lista contiene solo el slot avatar, con versión y estado de la imagen.",
+        "tags": [
+          "Fotografías de usuario"
+        ],
+        "operationId": "listUserPhotosGateway"
+      }
+    },
+    "/folder-documents/{id}/move": {
+      "post": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "moveFolderDocumentGateway",
+        "summary": "Mover documento a otra carpeta",
+        "description": "Sesión autenticada de Gateway requerida; para escrituras se exige protección CSRF y autorización en Files. Requiere permiso de escritura de Carpeta. folder_id es obligatorio y admite null para la raíz. Se verifican junta, carpeta destino y versión; si no cambia la carpeta, se retorna el documento existente.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID del documento dentro de la junta activa.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "folder_id",
+                  "version"
+                ],
+                "properties": {
+                  "folder_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid"
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483646
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderDocumentMutationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado inválido o sesión no autenticada."
+          },
+          "403": {
+            "description": "Emisor, contexto de junta o permiso insuficiente."
+          },
+          "404": {
+            "description": "Documento o carpeta no encontrados dentro de la junta activa."
+          },
+          "409": {
+            "description": "Conflicto de versión o de estado del documento."
+          },
+          "413": {
+            "description": "Cuerpo de solicitud por encima de 4096 bytes."
+          },
+          "422": {
+            "description": "Parámetros, versión, permisos delegados o nombre inválidos."
+          },
+          "429": {
+            "description": "Límite de solicitudes del Gateway alcanzado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -23443,6 +24376,126 @@
               "page": {
                 "type": "integer",
                 "minimum": 1
+              }
+            }
+          }
+        }
+      },
+      "FolderDocumentPreviewResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FolderDocumentMetadata"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "preview"
+                ],
+                "properties": {
+                  "preview": {
+                    "type": "object",
+                    "required": [
+                      "format"
+                    ],
+                    "properties": {
+                      "format": {
+                        "type": "string",
+                        "enum": [
+                          "plain_text",
+                          "grid",
+                          "image"
+                        ]
+                      },
+                      "text": {
+                        "type": "string"
+                      },
+                      "truncated": {
+                        "type": "boolean"
+                      },
+                      "sheet": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "sheet_index": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ]
+                      },
+                      "mime": {
+                        "type": "string",
+                        "enum": [
+                          "image/png"
+                        ]
+                      },
+                      "width": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "height": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "content": {
+                        "type": "string",
+                        "contentEncoding": "base64"
+                      },
+                      "page": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "pages": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "description": "La forma concreta depende del tipo: texto DOCX, cuadrícula XLSX o imagen PNG de una página PDF."
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "FolderDocumentMutationResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/FolderDocumentMetadata"
+          }
+        }
+      },
+      "FolderDocumentDeletedResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "id",
+              "deleted"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "deleted": {
+                "type": "boolean",
+                "const": true
               }
             }
           }

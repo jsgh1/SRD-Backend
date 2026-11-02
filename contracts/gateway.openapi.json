@@ -22879,6 +22879,246 @@
           }
         }
       }
+    },
+    "/contacts/{id}": {
+      "get": {
+        "summary": "Detalle de otra cuenta activa de la junta",
+        "description": "Resuelve únicamente a otra cuenta con membresía activa en la junta autenticada. Devuelve los campos de perfil usados por el contacto (incluido correo, cargo y biografía ES/EN); oculta las preferencias de presencia invisible como offline y no devuelve última conexión. La consulta a través de Gateway valida y renueva la actividad de la sesión.",
+        "operationId": "get_contact_detail",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "ID de la cuenta contacto."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ContactDetail"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La sesión requiere aceptación de términos o el rol no tiene permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "ID inválido o contacto no visible en la junta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Límite global de solicitudes excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "El servicio Identity no está disponible o rechazó la comunicación interna.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/members/folder-readers": {
+      "get": {
+        "summary": "Membresías elegibles para permisos de lectura de Carpeta",
+        "description": "Requiere members.manage (superadmin o admin). Solo incluye membresías activas de la junta cuyo rol sea registrar, tesorero, auditor o lector; búsqueda literal por nombre/correo o selección por hasta 20 IDs de membresía. La respuesta no incluye cuentas de otra junta ni membresías inactivas.",
+        "operationId": "get_folder_reader_candidates",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000,
+              "default": 1
+            },
+            "description": "Página de resultados; cada página contiene hasta 25 membresías."
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 120
+            },
+            "description": "Búsqueda literal por nombre o correo. Cuando ids[] contiene valores, la selección por IDs tiene prioridad."
+          },
+          {
+            "name": "ids[]",
+            "in": "query",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "maxItems": 20,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "description": "IDs de membresía para consultar selecciones existentes. PHP también acepta índices (ids[0], ids[1], …); una lista no vacía prevalece sobre search."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/FolderReadersPage"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente o expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La sesión requiere aceptación de términos o el rol no tiene permiso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Parámetros de consulta inválidos: página, búsqueda o IDs de membresía.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Límite global de solicitudes excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "El servicio Identity no está disponible o rechazó la comunicación interna.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -26164,6 +26404,149 @@
             "$ref": "#/components/schemas/PersonExportJobLegacyPdf"
           }
         ]
+      },
+      "ContactDetail": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "role",
+          "presence",
+          "title",
+          "title_en",
+          "email",
+          "bio",
+          "bio_en",
+          "person_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "superadmin",
+              "admin",
+              "registrar",
+              "treasurer",
+              "auditor",
+              "viewer"
+            ]
+          },
+          "presence": {
+            "type": "string",
+            "enum": [
+              "online",
+              "away",
+              "dnd",
+              "offline"
+            ],
+            "description": "La preferencia invisible siempre se representa como offline; no se exponen marcas de última conexión."
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 120,
+            "nullable": true
+          },
+          "title_en": {
+            "type": "string",
+            "maxLength": 120,
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "bio": {
+            "type": "string",
+            "maxLength": 500,
+            "nullable": true
+          },
+          "bio_en": {
+            "type": "string",
+            "maxLength": 500,
+            "nullable": true
+          },
+          "person_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "FolderReaderCandidate": {
+        "type": "object",
+        "required": [
+          "id",
+          "version",
+          "role",
+          "name",
+          "email"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID de la membresía seleccionable, no ID de la cuenta."
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "registrar",
+              "treasurer",
+              "auditor",
+              "viewer"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "FolderReadersPage": {
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "page_size"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FolderReaderCandidate"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000
+          },
+          "page_size": {
+            "type": "integer",
+            "enum": [
+              25
+            ]
+          }
+        }
       }
     }
   }

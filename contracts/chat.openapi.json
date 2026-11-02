@@ -2368,6 +2368,376 @@
         },
         "description": "Requires a valid signed Gateway context and chat.read access. The caller must participate in the conversation and the message must be visible to them. Returns JSON metadata and content; data.content contains the validated file bytes encoded as base64, not a binary response."
       }
+    },
+    "/conversations/{conversationId}/calls": {
+      "post": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "post_conversations__conversationId__calls",
+        "summary": "Iniciar una llamada de voz en una conversación",
+        "description": "Ruta interna protegida por X-SRD-Context firmado. Acepta únicamente contexto emitido por Gateway y permiso chat.read; el usuario y la junta deben ser participantes de la conversación. Finaliza llamadas caducadas antes de comprobar conflictos. Una llamada ringing o accepted existente devuelve 409. No añade un límite de solicitudes propio; el límite público se aplica en Gateway.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la conversación.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Llamada creada en estado ringing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "conversation_id",
+                        "caller_id",
+                        "callee_id",
+                        "status",
+                        "created_at",
+                        "answered_at",
+                        "ended_at"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "conversation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "caller_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "callee_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "ringing"
+                          ]
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "answered_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time"
+                        },
+                        "ended_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time"
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado inválido o vencido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso chat.read insuficiente o emisor interno no autorizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversación fuera de la junta o no accesible para el participante",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Ya existe una llamada ringing o accepted en esta conversación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error inesperado al iniciar la llamada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Identity o Chat no disponible temporalmente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{conversationId}/calls/{callId}/signal": {
+      "post": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "post_conversations__conversationId__calls__callId__signal",
+        "summary": "Enviar una señal de una llamada de voz",
+        "description": "Ruta interna protegida por X-SRD-Context firmado; solo contexto emitido por Gateway y permiso chat.read. La junta, el usuario y la llamada deben corresponder a un participante. Se aceptan offer, answer, candidate y mute según el esquema: caller envía offer; callee envía answer después de aceptar; ambos participantes activos pueden enviar candidate y mute. La llamada debe estar ringing o accepted. Offer y answer solo se admiten una vez por llamada; se limita a 256 candidate y 120 mute por remitente. El cuerpo HTTP no puede superar 32768 bytes.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la conversación.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "callId",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la llamada.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "kind",
+                  "payload"
+                ],
+                "description": "payload debe corresponder al kind seleccionado. El servicio conserva únicamente los campos admitidos para ese tipo.",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "offer",
+                      "answer",
+                      "candidate",
+                      "mute"
+                    ]
+                  },
+                  "payload": {
+                    "$ref": "#/components/schemas/VoiceSignalPayload"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Señal aceptada y almacenada durante la vigencia de la llamada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "sequence"
+                      ],
+                      "properties": {
+                        "sequence": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado inválido o vencido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso chat.read, emisor Gateway o rol de quien envía la señal no autorizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversación o llamada fuera de la junta o no accesible para el participante",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "La llamada ya no está activa o el offer/answer ya fue enviado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "El cuerpo completo de la solicitud supera 32768 bytes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "kind o payload requerido, inválido o fuera de los límites de campo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Cuota de señales por remitente excedida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error inesperado al almacenar la señal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Chat no disponible temporalmente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

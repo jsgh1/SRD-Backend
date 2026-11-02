@@ -27,14 +27,6 @@
                                                         "category":  "public"
                                                     },
                                                     {
-                                                        "operation":  "POST /conversations/{id}/calls",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "POST /conversations/{id}/calls/{callId}/signal",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "POST /conversations/{id}/calls/{callId}/transition",
                                                         "category":  "public"
                                                     },
@@ -103,14 +95,6 @@
                                   "routes":  [
                                                  {
                                                      "operation":  "GET /chat-attachment-references/{id}",
-                                                     "category":  "internal"
-                                                 },
-                                                 {
-                                                     "operation":  "POST /conversations/{conversationId}/calls",
-                                                     "category":  "internal"
-                                                 },
-                                                 {
-                                                     "operation":  "POST /conversations/{conversationId}/calls/{callId}/signal",
                                                      "category":  "internal"
                                                  },
                                                  {

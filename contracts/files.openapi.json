@@ -375,6 +375,215 @@
             }
           }
         }
+      },
+      "FolderReaderMembership": {
+        "type": "object",
+        "required": [
+          "id",
+          "version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          }
+        }
+      },
+      "FolderAccessSettings": {
+        "type": "object",
+        "required": [
+          "version",
+          "reader_roles",
+          "reader_memberships",
+          "can_manage",
+          "can_read"
+        ],
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "reader_roles": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "registrar",
+                "treasurer",
+                "auditor",
+                "viewer"
+              ]
+            }
+          },
+          "reader_memberships": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FolderReaderMembership"
+            }
+          },
+          "can_manage": {
+            "type": "boolean"
+          },
+          "can_read": {
+            "type": "boolean"
+          }
+        }
+      },
+      "FolderAccessResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/FolderAccessSettings"
+          }
+        }
+      },
+      "FolderDocumentSearchItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "folder_id",
+          "name",
+          "mime",
+          "bytes",
+          "sha256",
+          "version",
+          "folder_path",
+          "folder_path_en"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "folder_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "mime": {
+            "type": "string"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "folder_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "folder_name_en": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "folder_path": {
+            "type": "string",
+            "description": "Ruta relativa para mostrar desde Inicio o aviso de ubicación no disponible."
+          },
+          "folder_path_en": {
+            "type": "string",
+            "description": "Ruta relativa en inglés o aviso de ubicación no disponible."
+          }
+        }
+      },
+      "FolderDocumentSearchResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "items",
+              "total",
+              "page_size",
+              "page"
+            ],
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FolderDocumentSearchItem"
+                }
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "page_size": {
+                "type": "integer",
+                "const": 25
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        }
+      },
+      "FolderDocumentMutationResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/FolderDocumentMetadata"
+          }
+        }
+      },
+      "FolderDocumentDeletedResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "id",
+              "deleted"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "deleted": {
+                "type": "boolean",
+                "const": true
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -2628,6 +2837,433 @@
           },
           "403": {
             "description": "Emisor, rol o permiso de Carpeta insuficiente."
+          }
+        }
+      }
+    },
+    "/folder-access": {
+      "get": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "readFolderAccessSettingsInternal",
+        "summary": "Consultar la delegación de lectura de Carpeta de la junta activa",
+        "description": "Exige contexto interno firmado y emisor gateway; permite consultar flags can_manage/can_read. Los roles y membresías delegadas se devuelven vacíos si el principal no tiene folders.manage.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderAccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado inválido o sesión no autenticada."
+          },
+          "403": {
+            "description": "Emisor, contexto de junta o permiso insuficiente."
+          },
+          "413": {
+            "description": "Cuerpo de solicitud por encima de 4096 bytes."
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "updateFolderAccessSettingsInternal",
+        "summary": "Actualizar roles y membresías de lectura delegada",
+        "description": "Requiere el permiso folders.manage en la junta activa. Comprueba versión optimista y permite delegar solamente los cuatro roles listados; las membresías se validan por UUID y versión.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "version",
+                  "reader_roles"
+                ],
+                "properties": {
+                  "version": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2147483646
+                  },
+                  "reader_roles": {
+                    "type": "array",
+                    "maxItems": 4,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "registrar",
+                        "treasurer",
+                        "auditor",
+                        "viewer"
+                      ]
+                    }
+                  },
+                  "reader_memberships": {
+                    "type": "array",
+                    "maxItems": 20,
+                    "items": {
+                      "$ref": "#/components/schemas/FolderReaderMembership"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderAccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado inválido o sesión no autenticada."
+          },
+          "403": {
+            "description": "Emisor, contexto de junta o permiso insuficiente."
+          },
+          "409": {
+            "description": "Conflicto de versión o de estado del documento."
+          },
+          "413": {
+            "description": "Cuerpo de solicitud por encima de 4096 bytes."
+          },
+          "422": {
+            "description": "Parámetros, versión, permisos delegados o nombre inválidos."
+          }
+        }
+      }
+    },
+    "/folder-documents/search": {
+      "get": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "searchFolderDocumentsInternal",
+        "summary": "Buscar documentos privados de Carpeta",
+        "description": "Exige acceso de lectura a Carpeta y contexto firmado del Gateway; solo busca documentos listos, no eliminados y de la junta activa. Los caracteres comodín SQL de q se escapan antes de la consulta.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Texto de búsqueda no vacío tras trim, de hasta 120 caracteres.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Página de 25 resultados, inicia en 1.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000,
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderDocumentSearchResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado inválido o sesión no autenticada."
+          },
+          "403": {
+            "description": "Emisor, contexto de junta o permiso insuficiente."
+          },
+          "422": {
+            "description": "Parámetros, versión, permisos delegados o nombre inválidos."
+          }
+        }
+      }
+    },
+    "/folder-documents/{id}": {
+      "patch": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "renameFolderDocumentInternal",
+        "summary": "Renombrar documento con concurrencia optimista",
+        "description": "Requiere permiso de escritura de Carpeta. Verifica versión y nombre (debe conservar la extensión según MIME) antes de actualizar; si no cambia el nombre retorna metadatos sin nueva versión.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID del documento dentro de la junta activa.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "version"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483646
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderDocumentMutationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado inválido o sesión no autenticada."
+          },
+          "403": {
+            "description": "Emisor, contexto de junta o permiso insuficiente."
+          },
+          "404": {
+            "description": "Documento o carpeta no encontrados dentro de la junta activa."
+          },
+          "409": {
+            "description": "Conflicto de versión o de estado del documento."
+          },
+          "413": {
+            "description": "Cuerpo de solicitud por encima de 4096 bytes."
+          },
+          "422": {
+            "description": "Parámetros, versión, permisos delegados o nombre inválidos."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "deleteFolderDocumentInternal",
+        "summary": "Marcar documento para eliminación diferida",
+        "description": "Requiere permiso de escritura de Carpeta y confirm=true; compara versión. Devuelve marcador de eliminación; el blob y su cuota permanecen hasta que el colector procese la eliminación segura.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID del documento dentro de la junta activa.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "version",
+                  "confirm"
+                ],
+                "properties": {
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483646
+                  },
+                  "confirm": {
+                    "type": "boolean",
+                    "const": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderDocumentDeletedResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado inválido o sesión no autenticada."
+          },
+          "403": {
+            "description": "Emisor, contexto de junta o permiso insuficiente."
+          },
+          "404": {
+            "description": "Documento o carpeta no encontrados dentro de la junta activa."
+          },
+          "409": {
+            "description": "Conflicto de versión o de estado del documento."
+          },
+          "413": {
+            "description": "Cuerpo de solicitud por encima de 4096 bytes."
+          },
+          "422": {
+            "description": "Parámetros, versión, permisos delegados o nombre inválidos."
+          }
+        }
+      }
+    },
+    "/folder-documents/{id}/move": {
+      "post": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "moveFolderDocumentInternal",
+        "summary": "Mover documento a otra carpeta",
+        "description": "Requiere permiso de escritura de Carpeta. folder_id es obligatorio y admite null para la raíz. Se verifican junta, carpeta destino y versión; si no cambia la carpeta, se retorna el documento existente.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID del documento dentro de la junta activa.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "folder_id",
+                  "version"
+                ],
+                "properties": {
+                  "folder_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid"
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483646
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderDocumentMutationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado inválido o sesión no autenticada."
+          },
+          "403": {
+            "description": "Emisor, contexto de junta o permiso insuficiente."
+          },
+          "404": {
+            "description": "Documento o carpeta no encontrados dentro de la junta activa."
+          },
+          "409": {
+            "description": "Conflicto de versión o de estado del documento."
+          },
+          "413": {
+            "description": "Cuerpo de solicitud por encima de 4096 bytes."
+          },
+          "422": {
+            "description": "Parámetros, versión, permisos delegados o nombre inválidos."
           }
         }
       }

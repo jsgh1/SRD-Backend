@@ -5,9 +5,7 @@
                      "gateway":  [
                                      "DELETE /conversations/{id}/messages",
                                      "DELETE /conversations/{id}/messages/{messageId}",
-                                     "GET /contacts/{id}",
                                      "GET /conversations/{id}/messages/{messageId}/attachment",
-                                     "GET /members/folder-readers",
                                      "GET /privacy-requests",
                                      "GET /system/privacy-erasures",
                                      "PATCH /privacy-requests/{id}",
@@ -20,8 +18,6 @@
                                      "POST /privacy-requests/{id}/execute-erasure"
                                  ],
                      "identity":  [
-                                      "GET /contacts/{id}",
-                                      "GET /members/folder-readers",
                                       "POST /members/folder-readers/verify",
                                       "POST /persons/{id}/detach-for-erasure",
                                       "POST /persons/{id}/self-photo-access",

@@ -19,15 +19,7 @@
                                                         "category":  "public"
                                                     },
                                                     {
-                                                        "operation":  "GET /contacts/{id}",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "GET /conversations/{id}/messages/{messageId}/attachment",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "GET /members/folder-readers",
                                                         "category":  "public"
                                                     },
                                                     {
@@ -75,14 +67,6 @@
                      "identity":  {
                                       "rationale":  "services/identity/routes/api.php: routes are in middleware(internal); shared packages/php/src/InternalAuth.php verifies signed service context.",
                                       "routes":  [
-                                                     {
-                                                         "operation":  "GET /contacts/{id}",
-                                                         "category":  "internal"
-                                                     },
-                                                     {
-                                                         "operation":  "GET /members/folder-readers",
-                                                         "category":  "internal"
-                                                     },
                                                      {
                                                          "operation":  "POST /members/folder-readers/verify",
                                                          "category":  "internal"

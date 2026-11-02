@@ -241,34 +241,6 @@
                      "files":  {
                                    "rationale":  "services/files/routes/api.php: routes are in middleware(internal), including photo context routes; shared packages/php/src/InternalAuth.php verifies signed service context.",
                                    "routes":  [
-                                                  {
-                                                      "operation":  "DELETE /users/{id}/photos/{slot}",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
-                                                      "operation":  "GET /chat-attachments/{id}",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
-                                                      "operation":  "GET /folder-documents/{id}/preview",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
-                                                      "operation":  "GET /users/{id}/photos",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
-                                                      "operation":  "GET /users/{id}/photos/{slot}",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
-                                                      "operation":  "POST /chat-attachments",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
-                                                      "operation":  "PUT /users/{id}/photos/{slot}",
-                                                      "category":  "internal"
-                                                  }
                                               ]
                                },
                      "chat":  {

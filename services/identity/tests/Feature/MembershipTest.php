@@ -191,7 +191,7 @@ final class MembershipTest extends TestCase
                 'password' => 'unused-test-hash', 'created_at' => now(), 'updated_at' => now()],
         ]);
         DB::table('memberships')->insert([
-            ['id' => $viewerMembership, 'user_id' => $viewer, 'organization_id' => $this->org, 'role' => 'viewer'],
+            ['id' => $viewerMembership, 'user_id' => $viewer, 'organization_id' => $this->org, 'role' => 'viewer', 'version' => 1],
             ['id' => $targetMembership, 'user_id' => $target, 'organization_id' => $this->org, 'role' => 'viewer', 'version' => 7],
         ]);
 

@@ -19,14 +19,6 @@
                                                         "category":  "public"
                                                     },
                                                     {
-                                                        "operation":  "DELETE /folder-documents/{id}",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "DELETE /users/{id}/photos/avatar",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "GET /contacts/{id}",
                                                         "category":  "public"
                                                     },
@@ -44,10 +36,6 @@
                                                     },
                                                     {
                                                         "operation":  "GET /conversations/{id}/search",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "GET /folder-documents/{id}/preview",
                                                         "category":  "public"
                                                     },
                                                     {
@@ -71,23 +59,11 @@
                                                         "category":  "public"
                                                     },
                                                     {
-                                                        "operation":  "GET /users/{id}/photos",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "GET /users/{id}/photos/avatar",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "GET /voice-calls",
                                                         "category":  "public"
                                                     },
                                                     {
                                                         "operation":  "GET /voice-calls/ice-config",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "PATCH /folder-documents/{id}",
                                                         "category":  "public"
                                                     },
                                                     {
@@ -115,10 +91,6 @@
                                                         "category":  "public"
                                                     },
                                                     {
-                                                        "operation":  "POST /folder-documents/{id}/move",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "POST /persons/export-jobs",
                                                         "category":  "public"
                                                     },
@@ -128,10 +100,6 @@
                                                     },
                                                     {
                                                         "operation":  "POST /privacy-requests/{id}/execute-erasure",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "PUT /users/{id}/photos/avatar",
                                                         "category":  "public"
                                                     }
                                                 ]

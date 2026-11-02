@@ -2872,6 +2872,111 @@
           }
         }
       }
+    },
+    "/chat-attachment-references/{id}": {
+      "get": {
+        "summary": "Comprobar si un adjunto sigue referenciado en mensajes de la junta",
+        "description": "Ruta exclusiva para comunicación entre servicios; no es una API de navegador. Exige contexto interno firmado para audiencia Chat y emisor files, vigente, con método, ruta, hash y nonce validados. El contexto debe incluir organization_id. La consulta busca el attachment UUID únicamente en mensajes de esa junta y excluye los marcados deleted_for_all_at. Un identificador inexistente o sin referencia responde referenced=false; no revela contenido ni identidad de mensajes.",
+        "operationId": "internal_get_chat_attachment_reference",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID del adjunto consultado por Files.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indica si el adjunto conserva al menos una referencia visible dentro de la junta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "referenced"
+                      ],
+                      "properties": {
+                        "referenced": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "El contexto interno falta, venció, fue reutilizado o no coincide con la audiencia, método, ruta o cuerpo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El emisor no es Files o el contexto no incluye la junta requerida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El identificador de ruta no tiene formato UUID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "No se pudo consultar la base de datos de Chat.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

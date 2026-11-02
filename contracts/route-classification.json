@@ -242,10 +242,6 @@
                                    "rationale":  "services/files/routes/api.php: routes are in middleware(internal), including photo context routes; shared packages/php/src/InternalAuth.php verifies signed service context.",
                                    "routes":  [
                                                   {
-                                                      "operation":  "DELETE /folder-documents/{id}",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
                                                       "operation":  "DELETE /users/{id}/photos/{slot}",
                                                       "category":  "internal"
                                                   },
@@ -254,15 +250,7 @@
                                                       "category":  "internal"
                                                   },
                                                   {
-                                                      "operation":  "GET /folder-access",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
                                                       "operation":  "GET /folder-documents/{id}/preview",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
-                                                      "operation":  "GET /folder-documents/search",
                                                       "category":  "internal"
                                                   },
                                                   {
@@ -274,19 +262,7 @@
                                                       "category":  "internal"
                                                   },
                                                   {
-                                                      "operation":  "PATCH /folder-documents/{id}",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
                                                       "operation":  "POST /chat-attachments",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
-                                                      "operation":  "POST /folder-documents/{id}/move",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
-                                                      "operation":  "PUT /folder-access",
                                                       "category":  "internal"
                                                   },
                                                   {

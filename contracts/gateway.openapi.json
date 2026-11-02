@@ -22004,7 +22004,7 @@
         ],
         "operationId": "get_voice_calls",
         "summary": "Consultar hasta 10 llamadas entrantes que siguen sonando",
-        "description": "Requiere sesión y permiso chat.read; el Gateway reenvía al servicio Chat. Solo devuelve llamadas ringing dirigidas al usuario de la junta activa, ordenadas de más reciente a más antigua; llamadas caducadas se excluyen.",
+        "description": "Requiere sesión y permiso chat.read; el Gateway reenvía al servicio Chat. Solo devuelve llamadas ringing dirigidas al usuario de la junta activa, ordenadas de más reciente a más antigua. Al consultar, Chat procesa llamadas vencidas en las conversaciones encontradas: actualiza su estado, limpia señales y registra la llamada perdida o finalizada; las llamadas perdidas generan un aviso.",
         "security": [
           {
             "session": []
@@ -24777,12 +24777,7 @@
           "status": {
             "type": "string",
             "enum": [
-              "ringing",
-              "accepted",
-              "rejected",
-              "ended",
-              "missed",
-              "failed"
+              "ringing"
             ]
           },
           "created_at": {

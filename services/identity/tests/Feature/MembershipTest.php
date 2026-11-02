@@ -177,6 +177,91 @@ final class MembershipTest extends TestCase
         $this->internal('GET','members/folder-readers',[],array_replace($this->principal,['role'=>'viewer']))->assertForbidden();
     }
 
+    public function test_folder_reader_verification_rejects_viewer_without_leaking_members_or_changing_organization_scope(): void
+    {
+        $viewer = (string) Str::uuid();
+        $viewerMembership = (string) Str::uuid();
+        $target = (string) Str::uuid();
+        $targetMembership = (string) Str::uuid();
+
+        DB::table('users')->insert([
+            ['id' => $viewer, 'name' => 'Viewer de prueba', 'email' => 'viewer-p33@example.test',
+                'password' => 'unused-test-hash', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => $target, 'name' => 'Miembro confidencial', 'email' => 'private-p33@example.test',
+                'password' => 'unused-test-hash', 'created_at' => now(), 'updated_at' => now()],
+        ]);
+        DB::table('memberships')->insert([
+            ['id' => $viewerMembership, 'user_id' => $viewer, 'organization_id' => $this->org, 'role' => 'viewer'],
+            ['id' => $targetMembership, 'user_id' => $target, 'organization_id' => $this->org, 'role' => 'viewer', 'version' => 7],
+        ]);
+
+        $viewerPrincipal = ['user_id' => $viewer, 'organization_id' => $this->org, 'role' => 'viewer'];
+        $denied = $this->internal('POST', 'members/folder-readers/verify', [
+            'ids' => [$targetMembership],
+            'organization_id' => $this->other,
+        ], $viewerPrincipal);
+        $denied->assertForbidden()->assertJsonMissingPath('data.items');
+        $this->assertStringNotContainsString($targetMembership, $denied->getContent());
+        $this->assertStringNotContainsString('Miembro confidencial', $denied->getContent());
+        $this->assertDatabaseHas('memberships', [
+            'id' => $targetMembership, 'organization_id' => $this->org, 'version' => 7,
+        ]);
+
+        $this->internal('POST', 'members/folder-readers/verify', [
+            'ids' => [$targetMembership],
+            'organization_id' => $this->other,
+        ], $this->principal)->assertOk()
+            ->assertJsonPath('data.items.0.id', $targetMembership)
+            ->assertJsonPath('data.items.0.version', 7)
+            ->assertJsonMissingPath('data.items.0.organization_id')
+            ->assertJsonMissingPath('data.items.0.email');
+    }
+
+    public function test_self_photo_access_rejects_expired_stale_and_mismatched_sessions(): void
+    {
+        $viewer = (string) Str::uuid();
+        $person = (string) Str::uuid();
+        $session = (string) Str::uuid();
+        $otherUserSession = (string) Str::uuid();
+        $otherOrganizationSession = (string) Str::uuid();
+
+        DB::table('users')->insert([
+            'id' => $viewer, 'email' => 'self-photo-p33@example.test', 'name' => 'Self photo viewer',
+            'password' => 'unused-test-hash', 'created_at' => now(), 'updated_at' => now(),
+        ]);
+        DB::table('memberships')->insert([
+            'id' => (string) Str::uuid(), 'user_id' => $viewer, 'organization_id' => $this->org,
+            'role' => 'viewer', 'person_id' => $person,
+        ]);
+        DB::table('auth_sessions')->insert([
+            ['id' => $session, 'user_id' => $viewer, 'organization_id' => $this->org,
+                'token_hash' => hash('sha256', 'self-photo-p33-session'), 'last_activity_at' => now(),
+                'expires_at' => now()->addHour(), 'created_at' => now()],
+            ['id' => $otherUserSession, 'user_id' => $this->admin, 'organization_id' => $this->org,
+                'token_hash' => hash('sha256', 'self-photo-p33-other-user'), 'last_activity_at' => now(),
+                'expires_at' => now()->addHour(), 'created_at' => now()],
+            ['id' => $otherOrganizationSession, 'user_id' => $viewer, 'organization_id' => $this->other,
+                'token_hash' => hash('sha256', 'self-photo-p33-other-org'), 'last_activity_at' => now(),
+                'expires_at' => now()->addHour(), 'created_at' => now()],
+        ]);
+
+        $principal = ['user_id' => $viewer, 'organization_id' => $this->org, 'role' => 'viewer', 'session_id' => $session];
+        $path = "persons/$person/self-photo-access";
+
+        DB::table('auth_sessions')->where('id', $session)->update(['expires_at' => now()->subSecond()]);
+        $this->internal('POST', $path, [], $principal, 'records')->assertForbidden();
+
+        DB::table('auth_sessions')->where('id', $session)->update([
+            'expires_at' => now()->addHour(), 'last_activity_at' => now()->subMinutes(31),
+        ]);
+        $this->internal('POST', $path, [], $principal, 'records')->assertForbidden();
+
+        $principal['session_id'] = $otherUserSession;
+        $this->internal('POST', $path, [], $principal, 'records')->assertForbidden();
+
+        $principal['session_id'] = $otherOrganizationSession;
+        $this->internal('POST', $path, [], $principal, 'records')->assertForbidden();
+    }
     public function test_contacts_are_minimal_scoped_paginated_and_literal_search(): void
     {
         for ($i = 0; $i < 29; $i++) {

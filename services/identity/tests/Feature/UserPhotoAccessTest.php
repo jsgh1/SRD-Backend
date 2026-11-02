@@ -29,6 +29,44 @@ final class UserPhotoAccessTest extends TestCase
         }
     }
 
+    public function test_global_superadmin_photo_access_is_characterized_without_membership_policy_changes(): void
+    {
+        $otherOrganization = '77777777-7777-4777-8777-777777777777';
+        $superadmin = (string) \Illuminate\Support\Str::uuid();
+        $regularActor = (string) \Illuminate\Support\Str::uuid();
+
+        DB::table('users')->insert([
+            ['id' => $superadmin, 'name' => 'Superadministrador global', 'email' => 'superadmin-p33@example.test',
+                'password' => 'not-used', 'active' => true, 'superadmin' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['id' => $regularActor, 'name' => 'Cuenta de otra junta', 'email' => 'outsider-p33@example.test',
+                'password' => 'not-used', 'active' => true, 'superadmin' => false, 'created_at' => now(), 'updated_at' => now()],
+        ]);
+        DB::table('memberships')->insert([
+            ['id' => (string) \Illuminate\Support\Str::uuid(), 'user_id' => self::PEER,
+                'organization_id' => $otherOrganization, 'role' => 'viewer'],
+            ['id' => (string) \Illuminate\Support\Str::uuid(), 'user_id' => $regularActor,
+                'organization_id' => self::ORG, 'role' => 'viewer'],
+        ]);
+
+        $path = 'users/'.self::PEER.'/photo-access';
+        $globalPrincipal = ['organization_id' => $otherOrganization, 'user_id' => $superadmin, 'role' => 'superadmin'];
+        $this->assertDatabaseMissing('memberships', [
+            'organization_id' => $otherOrganization, 'user_id' => $superadmin,
+        ]);
+
+        $this->internal('POST', $path, ['action' => 'contacts.read'], $globalPrincipal, 'files')
+            ->assertOk()->assertJsonPath('data.authorized', true);
+        $this->internal('POST', $path, ['action' => 'profile.write'], $globalPrincipal, 'files')
+            ->assertForbidden();
+
+        DB::table('users')->where('id', $superadmin)->update(['active' => false]);
+        $this->internal('POST', $path, ['action' => 'contacts.read'], $globalPrincipal, 'files')
+            ->assertNotFound();
+
+        $regularPrincipal = ['organization_id' => $otherOrganization, 'user_id' => $regularActor, 'role' => 'viewer'];
+        $this->internal('POST', $path, ['action' => 'contacts.read'], $regularPrincipal, 'files')
+            ->assertNotFound();
+    }
     public function test_only_active_members_of_same_council_can_be_read_and_only_self_can_write(): void
     {
         $p = ['organization_id' => self::ORG, 'user_id' => self::ACTOR,

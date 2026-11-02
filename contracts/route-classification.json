@@ -35,10 +35,6 @@
                                                         "category":  "public"
                                                     },
                                                     {
-                                                        "operation":  "GET /conversations/{id}/search",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "GET /members/folder-readers",
                                                         "category":  "public"
                                                     },
@@ -56,14 +52,6 @@
                                                     },
                                                     {
                                                         "operation":  "GET /system/privacy-erasures",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "GET /voice-calls",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "GET /voice-calls/ice-config",
                                                         "category":  "public"
                                                     },
                                                     {
@@ -199,14 +187,6 @@
                                                  },
                                                  {
                                                      "operation":  "GET /conversations/{id}/messages/{messageId}/attachment",
-                                                     "category":  "internal"
-                                                 },
-                                                 {
-                                                     "operation":  "GET /conversations/{id}/search",
-                                                     "category":  "internal"
-                                                 },
-                                                 {
-                                                     "operation":  "GET /voice-calls",
                                                      "category":  "internal"
                                                  },
                                                  {

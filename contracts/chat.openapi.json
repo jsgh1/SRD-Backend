@@ -1498,6 +1498,183 @@
           }
         ]
       }
+    },
+    "/conversations/{id}/search": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "get_conversations__id__search",
+        "summary": "Buscar hasta 50 mensajes visibles en una conversación",
+        "description": "Ruta interna protegida por X-SRD-Context firmado, aislamiento de junta y participantes. Busca cuerpo y nombre de adjunto, escapa los comodines SQL y excluye mensajes ocultos o eliminados; ordena por sequence descendente.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la conversación perteneciente a la junta y al participante autenticado",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Coincidencia literal sobre cuerpo o nombre de adjunto; %, _ y ! se escapan como caracteres literales. Máximo 50 resultados, secuencia descendente.",
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 120
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado conforme a la implementación del servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatSearchResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión o contexto interno inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso chat.read insuficiente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversación o recurso no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Parámetros de búsqueda inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Límite de solicitudes excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Servicio temporalmente no disponible",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/voice-calls": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "get_voice_calls",
+        "summary": "Listar hasta 10 llamadas entrantes vigentes",
+        "description": "Ruta interna protegida por X-SRD-Context. Lista solo llamadas ringing dirigidas al usuario del contexto firmado dentro de su junta, excluyendo llamadas caducadas y ordenando por fecha descendente. Al consultar, procesa llamadas vencidas en las conversaciones encontradas: actualiza su estado, limpia señales y registra la llamada perdida o finalizada; las llamadas perdidas generan un aviso.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado conforme a la implementación del servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceCallListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión o contexto interno inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso chat.read insuficiente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Límite de solicitudes excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Servicio temporalmente no disponible",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3491,6 +3668,228 @@
           "inherit",
           "items"
         ]
+      },
+      "VoiceCallItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "conversation_id",
+          "caller_id",
+          "callee_id",
+          "status",
+          "created_at",
+          "answered_at",
+          "ended_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "conversation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caller_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "callee_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ringing"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "answered_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "ended_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "VoiceCallListResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "$ref": "#/components/schemas/VoiceCallItem"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "required": [
+              "correlation_id"
+            ],
+            "properties": {
+              "correlation_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        }
+      },
+      "ChatSearchMessage": {
+        "type": "object",
+        "required": [
+          "id",
+          "sequence",
+          "sender_id",
+          "body",
+          "reply_to_id",
+          "system_kind",
+          "call_duration_seconds",
+          "pinned",
+          "attachment",
+          "created_at",
+          "delivered_at",
+          "read_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sender_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "body": {
+            "type": "string"
+          },
+          "reply_to_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "system_kind": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "call_duration_seconds": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "pinned": {
+            "type": "boolean"
+          },
+          "attachment": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "required": [
+              "id",
+              "name",
+              "mime",
+              "bytes"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              },
+              "mime": {
+                "type": "string"
+              },
+              "bytes": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "delivered_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "read_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "ChatSearchResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "items"
+            ],
+            "properties": {
+              "items": {
+                "type": "array",
+                "maxItems": 50,
+                "items": {
+                  "$ref": "#/components/schemas/ChatSearchMessage"
+                }
+              }
+            }
+          },
+          "meta": {
+            "type": "object",
+            "required": [
+              "correlation_id"
+            ],
+            "properties": {
+              "correlation_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        }
       }
     },
     "securitySchemes": {

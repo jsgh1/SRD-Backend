@@ -21886,6 +21886,250 @@
           }
         }
       }
+    },
+    "/conversations/{id}/search": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "get_conversations__id__search",
+        "summary": "Buscar mensajes visibles dentro de una conversación",
+        "description": "Gateway transmite la consulta al servicio Chat con contexto de junta y usuario. Solo devuelve mensajes visibles para el participante, sin los eliminados u ocultos. No modifica datos.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la conversación perteneciente a la junta y al participante autenticado",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Coincidencia literal sobre cuerpo o nombre de adjunto; %, _ y ! se escapan como caracteres literales. Máximo 50 resultados, secuencia descendente.",
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 120
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado conforme a la implementación del servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatSearchResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión o contexto interno inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso chat.read insuficiente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversación o recurso no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Parámetros de búsqueda inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Límite de solicitudes excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Servicio temporalmente no disponible",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/voice-calls": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "get_voice_calls",
+        "summary": "Consultar hasta 10 llamadas entrantes que siguen sonando",
+        "description": "Requiere sesión y permiso chat.read; el Gateway reenvía al servicio Chat. Solo devuelve llamadas ringing dirigidas al usuario de la junta activa, ordenadas de más reciente a más antigua. Al consultar, Chat procesa llamadas vencidas en las conversaciones encontradas: actualiza su estado, limpia señales y registra la llamada perdida o finalizada; las llamadas perdidas generan un aviso.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado conforme a la implementación del servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceCallListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión o contexto interno inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso chat.read insuficiente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Límite de solicitudes excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Servicio temporalmente no disponible",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/voice-calls/ice-config": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "get_voice_calls_ice_config",
+        "summary": "Obtener servidores ICE STUN/TURN para llamadas web",
+        "description": "Gateway verifica sesión y chat.read. STUN se incluye solo si la URL es válida; TURN requiere URL y secreto configurado de al menos 32 caracteres. El username y credential TURN son temporales (3600 s); iceServers puede estar vacío. No es una ruta interna del servicio Chat.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado conforme a la implementación del servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceIceConfigResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión o contexto interno inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso chat.read insuficiente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Límite de solicitudes excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Servicio temporalmente no disponible",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -24496,6 +24740,280 @@
               "deleted": {
                 "type": "boolean",
                 "const": true
+              }
+            }
+          }
+        }
+      },
+      "VoiceCallItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "conversation_id",
+          "caller_id",
+          "callee_id",
+          "status",
+          "created_at",
+          "answered_at",
+          "ended_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "conversation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caller_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "callee_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ringing"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "answered_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "ended_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "VoiceCallListResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "$ref": "#/components/schemas/VoiceCallItem"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "required": [
+              "correlation_id"
+            ],
+            "properties": {
+              "correlation_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        }
+      },
+      "ChatSearchMessage": {
+        "type": "object",
+        "required": [
+          "id",
+          "sequence",
+          "sender_id",
+          "body",
+          "reply_to_id",
+          "system_kind",
+          "call_duration_seconds",
+          "pinned",
+          "attachment",
+          "created_at",
+          "delivered_at",
+          "read_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sender_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "body": {
+            "type": "string"
+          },
+          "reply_to_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "system_kind": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "call_duration_seconds": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "pinned": {
+            "type": "boolean"
+          },
+          "attachment": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "required": [
+              "id",
+              "name",
+              "mime",
+              "bytes"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              },
+              "mime": {
+                "type": "string"
+              },
+              "bytes": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "delivered_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "read_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "ChatSearchResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "items"
+            ],
+            "properties": {
+              "items": {
+                "type": "array",
+                "maxItems": 50,
+                "items": {
+                  "$ref": "#/components/schemas/ChatSearchMessage"
+                }
+              }
+            }
+          },
+          "meta": {
+            "type": "object",
+            "required": [
+              "correlation_id"
+            ],
+            "properties": {
+              "correlation_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        }
+      },
+      "VoiceIceConfigResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "iceServers"
+            ],
+            "properties": {
+              "iceServers": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "urls"
+                  ],
+                  "properties": {
+                    "urls": {
+                      "type": "string",
+                      "description": "URI STUN o TURN configurada"
+                    },
+                    "username": {
+                      "type": "string",
+                      "description": "Credencial temporal TURN: vencimiento UNIX y user_id"
+                    },
+                    "credential": {
+                      "type": "string",
+                      "description": "HMAC-SHA1 firmado, con vigencia de hasta una hora"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "meta": {
+            "type": "object",
+            "required": [
+              "correlation_id"
+            ],
+            "properties": {
+              "correlation_id": {
+                "type": "string",
+                "format": "uuid"
               }
             }
           }

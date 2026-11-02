@@ -23,10 +23,6 @@
                                                         "category":  "public"
                                                     },
                                                     {
-                                                        "operation":  "DELETE /folders/{id}",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "DELETE /users/{id}/photos/avatar",
                                                         "category":  "public"
                                                     },
@@ -51,19 +47,7 @@
                                                         "category":  "public"
                                                     },
                                                     {
-                                                        "operation":  "GET /folder-access",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "GET /folder-documents/{id}/preview",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "GET /folder-documents/search",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "GET /folders",
                                                         "category":  "public"
                                                     },
                                                     {
@@ -107,10 +91,6 @@
                                                         "category":  "public"
                                                     },
                                                     {
-                                                        "operation":  "PATCH /folders/{id}",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "PATCH /privacy-requests/{id}",
                                                         "category":  "public"
                                                     },
@@ -139,14 +119,6 @@
                                                         "category":  "public"
                                                     },
                                                     {
-                                                        "operation":  "POST /folders",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "POST /folders/{id}/move",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "POST /persons/export-jobs",
                                                         "category":  "public"
                                                     },
@@ -156,10 +128,6 @@
                                                     },
                                                     {
                                                         "operation":  "POST /privacy-requests/{id}/execute-erasure",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "PUT /folder-access",
                                                         "category":  "public"
                                                     },
                                                     {

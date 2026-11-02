@@ -11,10 +11,6 @@
                                      "rationale":  "services/gateway/routes/web.php: Route::prefix(api/v1); externally routable Gateway boundary. Public means boundary scope only, not anonymous access.",
                                      "routes":  [
                                                     {
-                                                        "operation":  "GET /conversations/{id}/messages/{messageId}/attachment",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "GET /privacy-requests",
                                                         "category":  "public"
                                                     },
@@ -40,10 +36,6 @@
                                                     },
                                                     {
                                                         "operation":  "POST /conversations/{id}/calls/{callId}/transition",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "POST /conversations/{id}/messages/{messageId}/pin",
                                                         "category":  "public"
                                                     },
                                                     {
@@ -114,10 +106,6 @@
                                                      "category":  "internal"
                                                  },
                                                  {
-                                                     "operation":  "GET /conversations/{id}/messages/{messageId}/attachment",
-                                                     "category":  "internal"
-                                                 },
-                                                 {
                                                      "operation":  "POST /conversations/{conversationId}/calls",
                                                      "category":  "internal"
                                                  },
@@ -127,10 +115,6 @@
                                                  },
                                                  {
                                                      "operation":  "POST /conversations/{conversationId}/calls/{callId}/transition",
-                                                     "category":  "internal"
-                                                 },
-                                                 {
-                                                     "operation":  "POST /conversations/{id}/messages/{messageId}/pin",
                                                      "category":  "internal"
                                                  }
                                              ]

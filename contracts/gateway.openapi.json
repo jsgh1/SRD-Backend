@@ -24809,6 +24809,141 @@
           }
         }
       }
+    },
+    "/system/privacy-erasures": {
+      "get": {
+        "summary": "Consultar contadores agregados del flujo de supresión; sesión administrativa requerida",
+        "description": "Frontera HTTP del Gateway bajo /api/v1; no es anónima. Requiere una sesión válida y una cuenta sin aceptación de términos pendiente. Records aplica organization.manage (roles superadmin o admin) usando el contexto de la membresía autenticada. La ruta aplica el límite global del Gateway y un límite específico de 10 solicitudes por minuto. Es una lectura de solo contadores operativos por junta, sin nombres ni identificadores personales. Gateway firma un contexto interno de corta duración para Records; si Identity o Records no está disponible devuelve 503.",
+        "operationId": "get_system_privacy_erasures",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contadores de supresión y trabajos fotográficos para la junta autenticada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "approved_pending",
+                        "in_progress",
+                        "photo_jobs_pending",
+                        "photo_jobs_due",
+                        "photo_jobs_stalled",
+                        "checked_at"
+                      ],
+                      "properties": {
+                        "approved_pending": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Solicitudes de supresión aprobadas que esperan ejecución."
+                        },
+                        "in_progress": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Solicitudes cuyo flujo de supresión está en curso."
+                        },
+                        "photo_jobs_pending": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Trabajos de eliminación de fotos no entregados."
+                        },
+                        "photo_jobs_due": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Trabajos pendientes cuyo próximo intento ya venció."
+                        },
+                        "photo_jobs_stalled": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Trabajos pendientes creados hace más de 15 minutos."
+                        },
+                        "checked_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Instante de la consulta en formato ISO 8601."
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión ausente, vencida o no válida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "La cuenta no tiene los términos vigentes aceptados o carece de organization.manage.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Se excedió el límite global o el límite específico de esta consulta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error inesperado procesando la consulta en Gateway.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Identity, Records o la firma del contexto interno no están disponibles.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

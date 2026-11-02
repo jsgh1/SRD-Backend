@@ -5848,6 +5848,121 @@
           }
         }
       }
+    },
+    "/privacy-erasure-status": {
+      "get": {
+        "summary": "Consultar contadores de supresión para la junta del contexto interno",
+        "description": "Ruta interna bajo middleware internal. Solo acepta un contexto firmado, vigente y de audiencia Records, con emisor gateway; InternalAuth también valida método, ruta, hash del cuerpo y nonce de un solo uso. Access::require exige organization.manage (superadmin o admin) y el contexto debe incluir organization_id y user_id. Todos los conteos se filtran por organization_id. La respuesta solo contiene agregados operativos y marca de tiempo; no expone datos personales ni cambia registros. Los fallos de base de datos se normalizan como 500. No es un endpoint para navegador ni acceso anónimo.",
+        "operationId": "internal_get_privacy_erasure_status",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contadores de la junta activa y momento de consulta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "approved_pending",
+                        "in_progress",
+                        "photo_jobs_pending",
+                        "photo_jobs_due",
+                        "photo_jobs_stalled",
+                        "checked_at"
+                      ],
+                      "properties": {
+                        "approved_pending": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Solicitudes de supresión aprobadas que esperan ejecución."
+                        },
+                        "in_progress": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Solicitudes cuyo flujo de supresión está en curso."
+                        },
+                        "photo_jobs_pending": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Trabajos de eliminación de fotos no entregados."
+                        },
+                        "photo_jobs_due": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Trabajos pendientes cuyo próximo intento ya venció."
+                        },
+                        "photo_jobs_stalled": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Trabajos pendientes creados hace más de 15 minutos."
+                        },
+                        "checked_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Instante de la consulta en formato ISO 8601."
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "El contexto interno falta, venció, fue reutilizado o no coincide con la audiencia, método, ruta o cuerpo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El emisor no es Gateway, falta el principal requerido o la cuenta no tiene organization.manage.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "No se pudo consultar la base de datos de Records.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

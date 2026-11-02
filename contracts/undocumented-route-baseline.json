@@ -3,7 +3,6 @@
     "description":  "Explicit inventory of pre-existing undocumented Laravel route templates. Entries remain open contract debt; this baseline only blocks unreviewed route drift.",
     "services":  {
                      "gateway":  [
-                                     "PATCH /privacy-requests/{id}",
                                      "POST /auth/{action}",
                                      "POST /privacy-requests/{id}/execute-erasure"
                                  ],
@@ -14,7 +13,6 @@
 
                                        ],
                      "records":  [
-                                     "PATCH /privacy-requests/{id}",
                                      "POST /privacy-requests/{id}/execute-erasure"
                                  ],
                      "audit":  [

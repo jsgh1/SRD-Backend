@@ -11,10 +11,6 @@
                                      "rationale":  "services/gateway/routes/web.php: Route::prefix(api/v1); externally routable Gateway boundary. Public means boundary scope only, not anonymous access.",
                                      "routes":  [
                                                     {
-                                                        "operation":  "GET /privacy-requests",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "GET /system/privacy-erasures",
                                                         "category":  "public"
                                                     },
@@ -62,10 +58,6 @@
                                      "routes":  [
                                                     {
                                                         "operation":  "GET /privacy-erasure-status",
-                                                        "category":  "internal"
-                                                    },
-                                                    {
-                                                        "operation":  "GET /privacy-requests",
                                                         "category":  "internal"
                                                     },
                                                     {

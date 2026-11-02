@@ -12357,6 +12357,335 @@
         ]
       }
     },
+    "/privacy-requests": {
+      "get": {
+        "summary": "Listar solicitudes de privacidad de la junta activa; solo superadmin y admin",
+        "description": "Requiere la sesión srd_session y el permiso organization.manage. La frontera Gateway es externa, pero esta operación no es anónima. Gateway obtiene el principal de la sesión, firma el contexto interno dirigido a Records y conserva el alcance de la junta activa. Devuelve hasta 25 solicitudes por página, ordenadas de más reciente a más antigua, con historial y datos personales de la ficha. El cliente debe restringir y proteger la respuesta.",
+        "operationId": "get_privacy_requests",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Página solicitada; valor predeterminado 1, mínimo 1 y máximo 100000.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000,
+              "default": 1
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "description": "Filtra por tipo de solicitud.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "access",
+                "correction",
+                "erasure"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Filtra por estado actual.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "open",
+                "in_review",
+                "resolved",
+                "rejected",
+                "approved_pending_erasure",
+                "erasure_in_progress",
+                "erased"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Solicitudes de privacidad de la junta activa. La respuesta puede contener nombres, número de documento, identificadores de cuenta y texto escrito por responsables.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "items",
+                        "total",
+                        "page",
+                        "page_size"
+                      ],
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "description": "La consulta incluye identificadores de junta, persona y cuentas, datos personales de la ficha y el resumen/decisión de la solicitud. No incluir registros reales en ejemplos públicos.",
+                            "required": [
+                              "id",
+                              "organization_id",
+                              "person_id",
+                              "kind",
+                              "status",
+                              "summary",
+                              "created_by",
+                              "responsible_id",
+                              "decision",
+                              "decided_at",
+                              "version",
+                              "created_at",
+                              "updated_at",
+                              "first_names",
+                              "last_names",
+                              "document_number",
+                              "history"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "organization_id": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "person_id": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "kind": {
+                                "type": "string",
+                                "enum": [
+                                  "access",
+                                  "correction",
+                                  "erasure"
+                                ]
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "open",
+                                  "in_review",
+                                  "resolved",
+                                  "rejected",
+                                  "approved_pending_erasure",
+                                  "erasure_in_progress",
+                                  "erased"
+                                ]
+                              },
+                              "summary": {
+                                "type": "string",
+                                "maxLength": 500
+                              },
+                              "created_by": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "responsible_id": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "format": "uuid"
+                              },
+                              "decision": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "maxLength": 500
+                              },
+                              "decided_at": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "format": "date-time"
+                              },
+                              "version": {
+                                "type": "integer",
+                                "minimum": 1
+                              },
+                              "created_at": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "updated_at": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "first_names": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "last_names": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "document_number": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "history": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "required": [
+                                    "request_id",
+                                    "actor_id",
+                                    "status",
+                                    "created_at"
+                                  ],
+                                  "properties": {
+                                    "request_id": {
+                                      "type": "string",
+                                      "format": "uuid"
+                                    },
+                                    "actor_id": {
+                                      "type": "string",
+                                      "format": "uuid"
+                                    },
+                                    "status": {
+                                      "type": "string",
+                                      "enum": [
+                                        "open",
+                                        "in_review",
+                                        "resolved",
+                                        "rejected",
+                                        "approved_pending_erasure",
+                                        "erasure_in_progress",
+                                        "erased"
+                                      ]
+                                    },
+                                    "created_at": {
+                                      "type": "string",
+                                      "format": "date-time"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "page": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 100000
+                        },
+                        "page_size": {
+                          "type": "integer",
+                          "const": 25
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No hay sesión autenticada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Falta el permiso organization.manage o la sesión no puede continuar por términos pendientes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Uno de los filtros no cumple las validaciones del servicio Records.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Se alcanzó el límite de solicitudes del Gateway.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "No se pudo completar la consulta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Records u otro servicio necesario no está disponible.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/quick-links": {
       "get": {
         "summary": "Accesos efectivos, catálogo autorizado y versiones de configuración",

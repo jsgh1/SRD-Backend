@@ -24118,6 +24118,179 @@
           }
         }
       }
+    },
+    "/conversations/{id}/calls/{callId}/transition": {
+      "post": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "post_conversations__id__calls__callId__transition",
+        "summary": "Cambiar el estado de una llamada de voz",
+        "description": "Requiere sesion autenticada, permiso chat.read y X-CSRF-TOKEN. El Gateway reenvia un contexto firmado y limitado al usuario y junta. accept/reject solo puede ejecutarlo la persona llamada mientras la llamada esta ringing. end/fail solo puede ejecutarlo cualquiera de los dos participantes mientras esta ringing o accepted. Los estados incompatibles producen 409. Las acciones terminales registran el resultado en el chat y eliminan las senales privadas de la llamada. Se aplica el limite global throttle:srd-global; esta ruta no tiene un limite especifico.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la conversacion.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "callId",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la llamada.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-CSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Obtener de /csrf; renovar tras /auth/verify y logout."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "action"
+                ],
+                "description": "accept/reject solo son validos para la persona llamada mientras el estado es ringing. end/fail requieren una llamada ringing o accepted y pueden ejecutarlos sus participantes.",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "accept",
+                      "reject",
+                      "end",
+                      "fail"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transicion aplicada; devuelve el estado y los identificadores de la llamada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceCallDetailResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesion ausente o invalida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso chat.read insuficiente, o accept/reject ejecutado por quien inicio la llamada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversacion o llamada fuera de la junta o no accesible para el participante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Accion incompatible con el estado actual; accept/reject requiere ringing y end/fail requiere una llamada activa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Token CSRF ausente o vencido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Accion requerida o no incluida en accept, reject, end, fail.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite global de solicitudes del Gateway excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error inesperado al procesar la transicion.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Servicio Chat no disponible temporalmente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

@@ -69,13 +69,6 @@
 
                                ],
                      "files":  [
-                                   "DELETE /users/{id}/photos/{slot}",
-                                   "GET /chat-attachments/{id}",
-                                   "GET /folder-documents/{id}/preview",
-                                   "GET /users/{id}/photos",
-                                   "GET /users/{id}/photos/{slot}",
-                                   "POST /chat-attachments",
-                                   "PUT /users/{id}/photos/{slot}"
                                ],
                      "calendar":  [
 

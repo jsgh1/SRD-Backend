@@ -3,7 +3,7 @@
   "info": {
     "title": "SRD Files: API interna de Carpeta, archivos y fotografías",
     "version": "0.1.0",
-    "description": "Servicio incorporado a Compose y conectado a rutas autenticadas del gateway. Solo emisor gateway con contexto de sesión previamente validada. El servicio consulta a Registros o Inventario y exige antivirus real y comprobación reciente de firmas. Este contrato describe su API interna. Las rutas de bienes verifican la junta y el estado activo en Inventario; la lectura se conserva tras la baja. La ruta photo-deletions admite exclusivamente al emisor records para órdenes persistentes de limpieza."
+    "description": "Servicio incorporado a Compose y conectado a rutas autenticadas del gateway. Las rutas de Carpeta y fotografías usan contexto firmado de Gateway; los adjuntos de Chat exigen explícitamente emisor interno chat. El servicio consulta a Registros o Inventario y exige antivirus real y comprobación reciente de firmas. Este contrato describe su API interna. Las rutas de bienes verifican la junta y el estado activo en Inventario; la lectura se conserva tras la baja. La ruta photo-deletions admite exclusivamente al emisor records para órdenes persistentes de limpieza."
   },
   "servers": [
     {
@@ -582,6 +582,156 @@
                 "const": true
               }
             }
+          }
+        }
+      },
+      "ChatAttachmentMetadata": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "mime",
+          "bytes"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "mime": {
+            "type": "string"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10485760
+          }
+        }
+      },
+      "ChatAttachmentResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ChatAttachmentMetadata"
+          }
+        }
+      },
+      "ChatAttachmentReadResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ChatAttachmentMetadata"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "content"
+                ],
+                "properties": {
+                  "content": {
+                    "type": "string",
+                    "contentEncoding": "base64",
+                    "description": "Contenido validado mediante longitud y SHA-256."
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "FolderDocumentPreviewResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FolderDocumentMetadata"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "preview"
+                ],
+                "properties": {
+                  "preview": {
+                    "type": "object",
+                    "required": [
+                      "format"
+                    ],
+                    "properties": {
+                      "format": {
+                        "type": "string",
+                        "enum": [
+                          "plain_text",
+                          "grid",
+                          "image"
+                        ]
+                      },
+                      "text": {
+                        "type": "string"
+                      },
+                      "truncated": {
+                        "type": "boolean"
+                      },
+                      "sheet": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "sheet_index": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ]
+                      },
+                      "mime": {
+                        "type": "string",
+                        "enum": [
+                          "image/png"
+                        ]
+                      },
+                      "width": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "height": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "content": {
+                        "type": "string",
+                        "contentEncoding": "base64"
+                      },
+                      "page": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "pages": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "description": "La forma concreta depende del tipo: texto DOCX, cuadrícula XLSX o imagen PNG de una página PDF."
+                  }
+                }
+              }
+            ]
           }
         }
       }
@@ -3266,6 +3416,793 @@
             "description": "Parámetros, versión, permisos delegados o nombre inválidos."
           }
         }
+      }
+    },
+    "/chat-attachments": {
+      "post": {
+        "tags": [
+          "Adjuntos internos"
+        ],
+        "operationId": "storeChatAttachmentInternal",
+        "summary": "Guardar adjunto privado de Chat",
+        "description": "El controlador admite únicamente el emisor de servicio firmado chat, no gateway ni un cliente directo. Valida conversation_id, usuario, junta y carga base64 canónica de máximo 10 MiB; analiza y normaliza los formatos admitidos. Repetir el mismo id solo es idempotente si coincide la conversación, usuario y contenido.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "conversation_id",
+                  "name",
+                  "content"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "conversation_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255
+                  },
+                  "content": {
+                    "type": "string",
+                    "contentEncoding": "base64",
+                    "maxLength": 13981016,
+                    "description": "Contenido base64 canónico; tamaño decodificado máximo 10 MiB. Imágenes, PDF, DOCX, XLSX, WAV o MP3."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatAttachmentResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado no válido."
+          },
+          "403": {
+            "description": "Emisor, junta, sesión o permiso no autorizado."
+          },
+          "409": {
+            "description": "Conflicto de versión o de repetición idempotente."
+          },
+          "413": {
+            "description": "El cuerpo supera el límite admitido."
+          },
+          "422": {
+            "description": "Nombre, tipo, contenido, versión u otro parámetro inválido."
+          },
+          "503": {
+            "description": "Archivo, procesador o dependencia de seguridad no disponible."
+          },
+          "507": {
+            "description": "Cuota de almacenamiento insuficiente."
+          }
+        }
+      }
+    },
+    "/chat-attachments/{id}": {
+      "get": {
+        "tags": [
+          "Adjuntos internos"
+        ],
+        "operationId": "readChatAttachmentInternal",
+        "summary": "Leer adjunto privado de Chat",
+        "description": "Solo emisor interno chat. Se comprueban la junta y conversation_id; se valida el hash y longitud del contenido almacenado antes de retornarlo codificado.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Identificador UUID del recurso."
+          },
+          {
+            "name": "conversation_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID de la conversación a la que pertenece el adjunto."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatAttachmentReadResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado no válido."
+          },
+          "403": {
+            "description": "Emisor, junta, sesión o permiso no autorizado."
+          },
+          "404": {
+            "description": "Recurso no encontrado o no accesible desde la junta actual."
+          },
+          "422": {
+            "description": "Nombre, tipo, contenido, versión u otro parámetro inválido."
+          },
+          "503": {
+            "description": "Archivo, procesador o dependencia de seguridad no disponible."
+          }
+        }
+      }
+    },
+    "/folder-documents/{id}/preview": {
+      "get": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "previewFolderDocumentInternal",
+        "summary": "Obtener vista previa segura de un documento privado",
+        "description": "Requiere lectura autorizada dentro de la junta; lee el documento verificando SHA-256, elimina content del resultado y devuelve preview limitado. El parámetro page solo aplica a PDF; sheet solo a hojas de cálculo. Errores del extractor y de herramientas locales se devuelven como fallo de dependencia.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Identificador UUID del recurso."
+          },
+          {
+            "name": "sheet",
+            "in": "query",
+            "required": false,
+            "description": "Hoja del archivo XLSX (1–32); inválido para PDF.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 32
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Página PDF (1–1000); inválida para otro tipo.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderDocumentPreviewResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado no válido."
+          },
+          "403": {
+            "description": "Emisor, junta, sesión o permiso no autorizado."
+          },
+          "404": {
+            "description": "Recurso no encontrado o no accesible desde la junta actual."
+          },
+          "422": {
+            "description": "Nombre, tipo, contenido, versión u otro parámetro inválido."
+          },
+          "503": {
+            "description": "Archivo, procesador o dependencia de seguridad no disponible."
+          }
+        }
+      }
+    },
+    "/users/{id}/photos": {
+      "get": {
+        "summary": "Consultar el estado de fotografía de avatar de usuario",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación confirmada; Cache-Control: no-store",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "slot",
+                              "version",
+                              "present",
+                              "size",
+                              "width",
+                              "height"
+                            ],
+                            "properties": {
+                              "slot": {
+                                "type": "string",
+                                "enum": [
+                                  "avatar"
+                                ]
+                              },
+                              "version": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "present": {
+                                "type": "boolean"
+                              },
+                              "size": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "width": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ]
+                              },
+                              "height": {
+                                "type": [
+                                  "integer",
+                                  "null"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "items"
+                      ]
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Firma inválida"
+          },
+          "403": {
+            "description": "Emisor, contexto o permiso inválido"
+          },
+          "404": {
+            "description": "Recurso no disponible"
+          },
+          "409": {
+            "description": "Versión en conflicto"
+          },
+          "413": {
+            "description": "Solicitud mayor de 7 MiB"
+          },
+          "422": {
+            "description": "Datos o imagen inválidos"
+          },
+          "503": {
+            "description": "Dependencia o antivirus no disponible"
+          },
+          "507": {
+            "description": "Cuota insuficiente"
+          }
+        },
+        "description": "Emisor gateway con contexto interno firmado, permiso contacts.read y verificación de la junta. La lista contiene solo el slot avatar, con versión y estado de la imagen.",
+        "tags": [
+          "Fotografías de usuario"
+        ],
+        "operationId": "listUserPhotosInternal"
+      }
+    },
+    "/users/{id}/photos/{slot}": {
+      "get": {
+        "summary": "Consultar avatar privado de usuario",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "slot",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "avatar"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación confirmada; Cache-Control: no-store",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "content",
+                        "mime",
+                        "version"
+                      ],
+                      "properties": {
+                        "content": {
+                          "type": "string",
+                          "contentEncoding": "base64"
+                        },
+                        "mime": {
+                          "const": "image/png"
+                        },
+                        "version": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Firma inválida"
+          },
+          "403": {
+            "description": "Emisor, contexto o permiso inválido"
+          },
+          "404": {
+            "description": "Recurso no disponible"
+          },
+          "409": {
+            "description": "Versión en conflicto"
+          },
+          "413": {
+            "description": "Solicitud mayor de 7 MiB"
+          },
+          "422": {
+            "description": "Datos o imagen inválidos"
+          },
+          "503": {
+            "description": "Dependencia o antivirus no disponible"
+          },
+          "507": {
+            "description": "Cuota insuficiente"
+          }
+        },
+        "description": "Requiere contacts.read y contexto firmado del Gateway. Retorna imagen PNG normalizada en base64; slot solo admite avatar.",
+        "tags": [
+          "Fotografías de usuario"
+        ],
+        "operationId": "readUserAvatarInternal"
+      },
+      "put": {
+        "summary": "Crear o reemplazar avatar de usuario con versión",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "slot",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "avatar"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "content",
+                  "version"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 255
+                  },
+                  "content": {
+                    "type": "string",
+                    "maxLength": 6990508,
+                    "contentEncoding": "base64",
+                    "description": "Base64 canónico sin espacios. JPEG, PNG o WebP; máximo 5 MiB y 20 millones de píxeles."
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2147483647
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación confirmada; Cache-Control: no-store",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "slot",
+                        "version",
+                        "present",
+                        "size",
+                        "width",
+                        "height"
+                      ],
+                      "properties": {
+                        "slot": {
+                          "type": "string",
+                          "enum": [
+                            "avatar"
+                          ]
+                        },
+                        "version": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "present": {
+                          "type": "boolean"
+                        },
+                        "size": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "width": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "height": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Firma inválida"
+          },
+          "403": {
+            "description": "Emisor, contexto o permiso inválido"
+          },
+          "404": {
+            "description": "Recurso no disponible"
+          },
+          "409": {
+            "description": "Versión en conflicto"
+          },
+          "413": {
+            "description": "Solicitud mayor de 7 MiB"
+          },
+          "422": {
+            "description": "Datos o imagen inválidos"
+          },
+          "503": {
+            "description": "Dependencia o antivirus no disponible"
+          },
+          "507": {
+            "description": "Cuota insuficiente"
+          }
+        },
+        "description": "Requiere profile.write, versión esperada, foto JPEG/PNG/WebP de hasta 5 MiB y validación de seguridad. El servicio publica evento y controla cuota.",
+        "tags": [
+          "Fotografías de usuario"
+        ],
+        "operationId": "putUserAvatarInternal"
+      },
+      "delete": {
+        "summary": "Eliminar avatar de usuario con confirmación y versión",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "slot",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "avatar"
+              ]
+            }
+          }
+        ],
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "confirmed",
+                  "version"
+                ],
+                "properties": {
+                  "confirmed": {
+                    "const": true
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483647
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación confirmada; Cache-Control: no-store",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "slot",
+                        "version",
+                        "present",
+                        "size",
+                        "width",
+                        "height"
+                      ],
+                      "properties": {
+                        "slot": {
+                          "type": "string",
+                          "enum": [
+                            "avatar"
+                          ]
+                        },
+                        "version": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "present": {
+                          "type": "boolean"
+                        },
+                        "size": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "width": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "height": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Firma inválida"
+          },
+          "403": {
+            "description": "Emisor, contexto o permiso inválido"
+          },
+          "404": {
+            "description": "Recurso no disponible"
+          },
+          "409": {
+            "description": "Versión en conflicto"
+          },
+          "413": {
+            "description": "Solicitud mayor de 7 MiB"
+          },
+          "422": {
+            "description": "Datos o imagen inválidos"
+          },
+          "503": {
+            "description": "Dependencia o antivirus no disponible"
+          },
+          "507": {
+            "description": "Cuota insuficiente"
+          }
+        },
+        "description": "Requiere profile.write, confirmed=true y versión vigente. Actualiza marcador sin contenido y difiere la eliminación del blob de forma segura.",
+        "tags": [
+          "Fotografías de usuario"
+        ],
+        "operationId": "deleteUserAvatarInternal"
       }
     }
   }

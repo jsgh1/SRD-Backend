@@ -6072,6 +6072,260 @@
           }
         }
       }
+    },
+    "/privacy-requests/{id}": {
+      "patch": {
+        "operationId": "internal_patch_privacy_request",
+        "summary": "Actualizar el estado de una solicitud de privacidad desde el Gateway",
+        "description": "Ruta interna bajo middleware internal; solo acepta un contexto firmado de corta duracion con audiencia Records, metodo PATCH, ruta y hash del cuerpo coincidentes. Access::require valida organization.manage. La consulta y actualizacion filtran por organization_id y el identificador; una solicitud de otra junta responde 404. Las transiciones y reglas de decision se validan contra el tipo y estado actuales y la persona responsable. Se registran responsable, historial, version y outbox dentro de una transaccion. approved_pending_erasure solo aprueba la solicitud; esta ruta no ejecuta supresiones.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Identificador UUID de la solicitud.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "required": [
+                      "version",
+                      "status"
+                    ],
+                    "properties": {
+                      "version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "status": {
+                        "const": "in_review"
+                      },
+                      "decision": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "maxLength": 500,
+                        "description": "Omitir o dejar vacio; el servicio rechaza una decision no vacia al iniciar la revision."
+                      }
+                    },
+                    "additionalProperties": false,
+                    "description": "Inicia la revision de una solicitud open y asigna como responsable al principal actual."
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "version",
+                      "status",
+                      "decision"
+                    ],
+                    "properties": {
+                      "version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "status": {
+                        "const": "resolved"
+                      },
+                      "decision": {
+                        "type": "string",
+                        "minLength": 10,
+                        "maxLength": 500,
+                        "description": "El servicio aplica trim y exige al menos 10 caracteres despues de quitar espacios externos."
+                      }
+                    },
+                    "additionalProperties": false,
+                    "description": "Solo para solicitudes access o correction en revision."
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "version",
+                      "status",
+                      "decision"
+                    ],
+                    "properties": {
+                      "version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "status": {
+                        "const": "rejected"
+                      },
+                      "decision": {
+                        "type": "string",
+                        "minLength": 10,
+                        "maxLength": 500,
+                        "description": "El servicio aplica trim y exige al menos 10 caracteres despues de quitar espacios externos."
+                      }
+                    },
+                    "additionalProperties": false,
+                    "description": "Rechaza una solicitud que esta en revision."
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "version",
+                      "status",
+                      "decision"
+                    ],
+                    "properties": {
+                      "version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "status": {
+                        "const": "approved_pending_erasure"
+                      },
+                      "decision": {
+                        "type": "string",
+                        "minLength": 10,
+                        "maxLength": 500,
+                        "description": "El servicio aplica trim y exige al menos 10 caracteres despues de quitar espacios externos."
+                      }
+                    },
+                    "additionalProperties": false,
+                    "description": "Solo aprueba una solicitud de supresion en revision; no ejecuta la supresion."
+                  }
+                ],
+                "description": "La transicion tambien depende del tipo y estado almacenados. Una solicitud open solo puede pasar a in_review; en revision decide unicamente la persona responsable. La version debe coincidir con la version actual."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Estado de revision actualizado. Se incrementa version, se registra historial y se escribe el evento outbox dentro de una transaccion.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "status",
+                        "version"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "in_review",
+                            "resolved",
+                            "rejected",
+                            "approved_pending_erasure"
+                          ]
+                        },
+                        "version": {
+                          "type": "integer",
+                          "minimum": 2
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta el contexto interno firmado o no coincide con la audiencia, ruta o metodo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El principal no tiene organization.manage o no es la persona responsable de la decision.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "La solicitud no existe dentro de la junta del principal.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "La version recibida ya no coincide con la solicitud actual.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El cuerpo, la transicion de estado o la decision no cumple las reglas del servicio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "No se pudo actualizar la solicitud en Records.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

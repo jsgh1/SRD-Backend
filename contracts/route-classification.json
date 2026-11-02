@@ -61,15 +61,6 @@
                                                         "category":  "internal"
                                                     }
                                                 ]
-                                 },
-                     "chat":  {
-                                  "rationale":  "services/chat/routes/api.php: routes are in middleware(internal); shared packages/php/src/InternalAuth.php verifies signed service context.",
-                                  "routes":  [
-                                                 {
-                                                     "operation":  "GET /chat-attachment-references/{id}",
-                                                     "category":  "internal"
-                                                 }
-                                             ]
-                              }
+                                 }
                  }
 }

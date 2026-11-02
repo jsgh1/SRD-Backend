@@ -39,7 +39,6 @@
 
                                    ],
                      "chat":  [
-                                  "GET /chat-attachment-references/{id}"
                               ]
                  }
 }

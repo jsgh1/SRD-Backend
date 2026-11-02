@@ -11,14 +11,6 @@
                                      "rationale":  "services/gateway/routes/web.php: Route::prefix(api/v1); externally routable Gateway boundary. Public means boundary scope only, not anonymous access.",
                                      "routes":  [
                                                     {
-                                                        "operation":  "DELETE /conversations/{id}/messages",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "DELETE /conversations/{id}/messages/{messageId}",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "GET /conversations/{id}/messages/{messageId}/attachment",
                                                         "category":  "public"
                                                     },
@@ -117,14 +109,6 @@
                      "chat":  {
                                   "rationale":  "services/chat/routes/api.php: routes are in middleware(internal); shared packages/php/src/InternalAuth.php verifies signed service context.",
                                   "routes":  [
-                                                 {
-                                                     "operation":  "DELETE /conversations/{id}/messages",
-                                                     "category":  "internal"
-                                                 },
-                                                 {
-                                                     "operation":  "DELETE /conversations/{id}/messages/{messageId}",
-                                                     "category":  "internal"
-                                                 },
                                                  {
                                                      "operation":  "GET /chat-attachment-references/{id}",
                                                      "category":  "internal"

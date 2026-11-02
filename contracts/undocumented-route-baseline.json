@@ -3,8 +3,6 @@
     "description":  "Explicit inventory of pre-existing undocumented Laravel route templates. Entries remain open contract debt; this baseline only blocks unreviewed route drift.",
     "services":  {
                      "gateway":  [
-                                     "DELETE /conversations/{id}/messages",
-                                     "DELETE /conversations/{id}/messages/{messageId}",
                                      "GET /conversations/{id}/messages/{messageId}/attachment",
                                      "GET /privacy-requests",
                                      "GET /system/privacy-erasures",
@@ -52,8 +50,6 @@
 
                                    ],
                      "chat":  [
-                                  "DELETE /conversations/{id}/messages",
-                                  "DELETE /conversations/{id}/messages/{messageId}",
                                   "GET /chat-attachment-references/{id}",
                                   "GET /conversations/{id}/messages/{messageId}/attachment",
                                   "POST /conversations/{conversationId}/calls",

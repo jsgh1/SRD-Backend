@@ -71,6 +71,9 @@ jobs:
         run: |
           php tools/contracts/check-openapi-success-schemas.php --self-test
           php tools/contracts/check-openapi-success-schemas.php
+      - name: Validate dynamic auth action checker
+        if: matrix.service == 'gateway'
+        run: php tools/contracts/check-openapi-auth-actions.php --self-test
       - name: Validate service OpenAPI routes
         working-directory: services/${{ matrix.service }}
         shell: bash

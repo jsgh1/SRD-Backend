@@ -23,14 +23,6 @@
                                                         "category":  "public"
                                                     },
                                                     {
-                                                        "operation":  "GET /conversations/{id}/calls/{callId}",
-                                                        "category":  "public"
-                                                    },
-                                                    {
-                                                        "operation":  "GET /conversations/{id}/calls/{callId}/signals",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "GET /conversations/{id}/messages/{messageId}/attachment",
                                                         "category":  "public"
                                                     },
@@ -175,14 +167,6 @@
                                                  },
                                                  {
                                                      "operation":  "GET /chat-attachment-references/{id}",
-                                                     "category":  "internal"
-                                                 },
-                                                 {
-                                                     "operation":  "GET /conversations/{conversationId}/calls/{callId}",
-                                                     "category":  "internal"
-                                                 },
-                                                 {
-                                                     "operation":  "GET /conversations/{conversationId}/calls/{callId}/signals",
                                                      "category":  "internal"
                                                  },
                                                  {

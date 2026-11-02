@@ -22130,6 +22130,215 @@
           }
         }
       }
+    },
+    "/conversations/{id}/calls/{callId}": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "get_conversation_call",
+        "summary": "Consultar el estado de una llamada",
+        "description": "Requiere sesión y permiso chat.read. El Gateway reenvía al servicio Chat con el contexto firmado; solo participantes de la conversación pueden consultar la llamada. Al consultar, el servicio vence llamadas caducadas de esa conversación (actualiza el estado, elimina señales y registra el evento de llamada); si la llamada sigue accepted, renueva su vencimiento por cinco minutos.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la conversación",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "callId",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la llamada",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estado actual de la llamada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceCallDetailResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión o contexto interno inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso chat.read o acceso del participante insuficiente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversación o llamada no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Servicio temporalmente no disponible",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{id}/calls/{callId}/signals": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "get_conversation_call_signals",
+        "summary": "Leer señales WebRTC pendientes de una llamada",
+        "description": "Requiere sesión y permiso chat.read. El Gateway reenvía al servicio Chat con el contexto firmado; solo participantes de la conversación pueden consultar la llamada. Devuelve señales emitidas por el otro participante, con sequence mayor que after, en orden ascendente y hasta 100 elementos. Solo está disponible mientras la llamada esté ringing o accepted; no modifica la llamada.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la conversación",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "callId",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la llamada",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "description": "Última secuencia ya recibida; el valor predeterminado es 0.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Señales nuevas de la otra parte, hasta 100 elementos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceCallSignalsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión o contexto interno inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso chat.read o acceso del participante insuficiente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversación o llamada no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "La llamada ya no admite intercambio de señales",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Parámetro after inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Servicio temporalmente no disponible",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -25003,6 +25212,229 @@
                   }
                 }
               }
+            }
+          },
+          "meta": {
+            "type": "object",
+            "required": [
+              "correlation_id"
+            ],
+            "properties": {
+              "correlation_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        }
+      },
+      "VoiceCallRecord": {
+        "type": "object",
+        "required": [
+          "id",
+          "conversation_id",
+          "caller_id",
+          "callee_id",
+          "status",
+          "created_at",
+          "answered_at",
+          "ended_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "conversation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caller_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "callee_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ringing",
+              "accepted",
+              "rejected",
+              "ended",
+              "missed",
+              "failed"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "answered_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "ended_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "VoiceCallDetailResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/VoiceCallRecord"
+          },
+          "meta": {
+            "type": "object",
+            "required": [
+              "correlation_id"
+            ],
+            "properties": {
+              "correlation_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        }
+      },
+      "VoiceSignalPayload": {
+        "description": "La forma depende de kind: offer/answer contienen type y SDP; candidate contiene candidate y puede incluir sdpMid/sdpMLineIndex; mute contiene muted.",
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "sdp"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "offer"
+                ]
+              },
+              "sdp": {
+                "type": "string",
+                "maxLength": 24000
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "sdp"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "answer"
+                ]
+              },
+              "sdp": {
+                "type": "string",
+                "maxLength": 24000
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "candidate"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "candidate": {
+                "type": "string",
+                "maxLength": 4096
+              },
+              "sdpMid": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 256
+              },
+              "sdpMLineIndex": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0,
+                "maximum": 128
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "muted"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "muted": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "VoiceCallSignalItem": {
+        "type": "object",
+        "required": [
+          "sequence",
+          "kind",
+          "payload"
+        ],
+        "properties": {
+          "sequence": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "offer",
+              "answer",
+              "candidate",
+              "mute"
+            ]
+          },
+          "payload": {
+            "$ref": "#/components/schemas/VoiceSignalPayload"
+          }
+        }
+      },
+      "VoiceCallSignalsResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/VoiceCallSignalItem"
             }
           },
           "meta": {

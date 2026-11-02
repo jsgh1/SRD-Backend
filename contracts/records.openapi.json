@@ -5963,6 +5963,115 @@
           }
         }
       }
+    },
+    "/public-logo/{id}": {
+      "get": {
+        "summary": "Obtener el logo público de una junta mediante el contexto de Gateway",
+        "description": "Endpoint interno de Records, no accesible anónimamente desde el navegador. Exige contexto firmado para audiencia Records y emisor gateway; el parámetro es el UUID de la junta y la consulta selecciona únicamente su logo_data. Gateway lo llama al resolver la configuración pública por código de junta; esa configuración puede ser anónima, por lo que el logo es dato de marca pública. Records devuelve null si la junta no tiene configuración o logo. El guardado de configuración valida PNG de hasta 128 KiB y 1024 × 1024; este GET no modifica datos. Gateway trata una falla de Records como logo_data=null para no bloquear el acceso.",
+        "operationId": "internal_get_public_logo",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la junta cuyo logo se consulta.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logo PNG codificado como data URI, o null si no existe configuración o logo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "logo_data"
+                      ],
+                      "properties": {
+                        "logo_data": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Data URI de imagen PNG; null cuando no hay logo."
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "El contexto interno falta, venció, fue reutilizado o no coincide con la audiencia, método, ruta o cuerpo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El emisor del contexto interno no es Gateway.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El identificador de ruta no tiene formato UUID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "No se pudo consultar el almacenamiento de configuración de Records.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

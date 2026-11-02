@@ -17,7 +17,6 @@
 
                                        ],
                      "records":  [
-                                     "GET /public-logo/{id}",
                                      "PATCH /privacy-requests/{id}",
                                      "POST /privacy-requests/{id}/execute-erasure"
                                  ],

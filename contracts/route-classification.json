@@ -49,10 +49,6 @@
                                      "rationale":  "services/records/routes/api.php: routes are in middleware(internal); shared packages/php/src/InternalAuth.php verifies signed service context.",
                                      "routes":  [
                                                     {
-                                                        "operation":  "GET /public-logo/{id}",
-                                                        "category":  "internal"
-                                                    },
-                                                    {
                                                         "operation":  "PATCH /privacy-requests/{id}",
                                                         "category":  "internal"
                                                     },

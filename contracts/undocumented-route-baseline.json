@@ -6,7 +6,6 @@
                                      "GET /system/privacy-erasures",
                                      "PATCH /privacy-requests/{id}",
                                      "POST /auth/{action}",
-                                     "POST /privacy-requests",
                                      "POST /privacy-requests/{id}/execute-erasure"
                                  ],
                      "identity":  [
@@ -22,7 +21,6 @@
                                      "GET /privacy-erasure-status",
                                      "GET /public-logo/{id}",
                                      "PATCH /privacy-requests/{id}",
-                                     "POST /privacy-requests",
                                      "POST /privacy-requests/{id}/execute-erasure"
                                  ],
                      "audit":  [

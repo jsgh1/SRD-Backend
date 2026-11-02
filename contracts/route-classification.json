@@ -23,10 +23,6 @@
                                                         "category":  "public"
                                                     },
                                                     {
-                                                        "operation":  "POST /privacy-requests",
-                                                        "category":  "public"
-                                                    },
-                                                    {
                                                         "operation":  "POST /privacy-requests/{id}/execute-erasure",
                                                         "category":  "public"
                                                     }
@@ -66,10 +62,6 @@
                                                     },
                                                     {
                                                         "operation":  "PATCH /privacy-requests/{id}",
-                                                        "category":  "internal"
-                                                    },
-                                                    {
-                                                        "operation":  "POST /privacy-requests",
                                                         "category":  "internal"
                                                     },
                                                     {

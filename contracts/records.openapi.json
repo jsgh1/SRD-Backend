@@ -5698,6 +5698,155 @@
             }
           }
         }
+      },
+      "post": {
+        "summary": "Crear solicitud de privacidad desde el contexto interno autorizado",
+        "description": "Ruta interna protegida por middleware internal y contexto firmado para Records. Access::require exige organization.manage (superadmin o admin). person_id debe pertenecer a la junta del principal; una persona de otra junta responde 404. El resumen se recorta con trim antes de guardarse. La operación registra historial y evento outbox dentro de una transacción. No se define clave de idempotencia: el cliente no debe reintentar automáticamente una creación tras un resultado ambiguo.",
+        "operationId": "internal_post_privacy_requests",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "person_id",
+                  "kind",
+                  "summary"
+                ],
+                "properties": {
+                  "person_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Persona perteneciente a la misma junta del principal autenticado."
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "access",
+                      "correction",
+                      "erasure"
+                    ]
+                  },
+                  "summary": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 500,
+                    "description": "Se guarda sin espacios externos tras aplicar trim."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Solicitud creada con estado open y versión inicial 1.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "status",
+                        "version"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "status": {
+                          "type": "string",
+                          "const": "open"
+                        },
+                        "version": {
+                          "type": "integer",
+                          "const": 1
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error normalizado 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error normalizado 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error normalizado 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error normalizado 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error normalizado 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     }
   },

@@ -20279,6 +20279,680 @@
           }
         }
       }
+    },
+    "/folder-access": {
+      "get": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "readFolderAccessSettings",
+        "summary": "Consultar la delegación de lectura de Carpeta de la junta activa",
+        "description": "Endpoint público en la frontera HTTP (no anónimo). Requiere cookie de sesión SRD, CSRF para mutaciones y permisos del servicio Files. Exige sesión autenticada de Gateway y sesión Gateway; permite consultar flags can_manage/can_read. Los roles y membresías delegadas se devuelven vacíos si el principal no tiene folders.manage.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderAccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado inválido o sesión no autenticada."
+          },
+          "403": {
+            "description": "Emisor, contexto de junta o permiso insuficiente."
+          },
+          "413": {
+            "description": "Cuerpo de solicitud por encima de 4096 bytes."
+          },
+          "429": {
+            "description": "Límite de solicitudes por Gateway excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "updateFolderAccessSettings",
+        "summary": "Actualizar roles y membresías de lectura delegada",
+        "description": "Requiere sesión SRD y folders.manage. Gateway valida la lista de UUIDs reader_memberships contra Identity antes de remitir registros autorizados al servicio Files. Control de versión y lector_roles en Files; los datos del principal no los elige el cliente.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "version",
+                  "reader_roles"
+                ],
+                "properties": {
+                  "version": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2147483646
+                  },
+                  "reader_roles": {
+                    "type": "array",
+                    "maxItems": 4,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "registrar",
+                        "treasurer",
+                        "auditor",
+                        "viewer"
+                      ]
+                    }
+                  },
+                  "reader_memberships": {
+                    "type": "array",
+                    "maxItems": 20,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "description": "UUIDs de membresías; Gateway las verifica en Identity y convierte a registros con versión para el servicio Files."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderAccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado inválido o sesión no autenticada."
+          },
+          "403": {
+            "description": "Emisor, contexto de junta o permiso insuficiente."
+          },
+          "409": {
+            "description": "Conflicto de versión o de estado del documento."
+          },
+          "413": {
+            "description": "Cuerpo de solicitud por encima de 4096 bytes."
+          },
+          "422": {
+            "description": "Parámetros, versión, permisos delegados o nombre inválidos."
+          },
+          "429": {
+            "description": "Límite de solicitudes por Gateway excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/folder-documents/search": {
+      "get": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "searchFolderDocuments",
+        "summary": "Buscar documentos privados de Carpeta",
+        "description": "Endpoint público en la frontera HTTP (no anónimo). Requiere cookie de sesión SRD, CSRF para mutaciones y permisos del servicio Files. Exige acceso de lectura a Carpeta y sesión autenticada de Gateway; solo busca documentos listos, no eliminados y de la junta activa. Los caracteres comodín SQL de q se escapan antes de la consulta.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Texto de búsqueda no vacío tras trim, de hasta 120 caracteres.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Página de 25 resultados, inicia en 1.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000,
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderDocumentSearchResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado inválido o sesión no autenticada."
+          },
+          "403": {
+            "description": "Emisor, contexto de junta o permiso insuficiente."
+          },
+          "422": {
+            "description": "Parámetros, versión, permisos delegados o nombre inválidos."
+          },
+          "429": {
+            "description": "Límite de solicitudes por Gateway excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/folders": {
+      "get": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "listFolders",
+        "summary": "Listar carpetas de la junta activa",
+        "description": "Endpoint público en la frontera HTTP (no anónimo). Requiere cookie de sesión SRD, CSRF para mutaciones y permisos del servicio Files. Requiere sesión autenticada de Gateway y folders.manage o permiso delegado de lectura. Filtra únicamente por la junta activa y devuelve 25 resultados por página.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta contexto interno firmado válido o autenticación."
+          },
+          "403": {
+            "description": "Emisor, rol o permiso de Carpeta insuficiente."
+          },
+          "404": {
+            "description": "La carpeta de la junta activa o su ruta principal no existe."
+          },
+          "409": {
+            "description": "Conflicto de versión, jerarquía, duplicado o límite."
+          },
+          "413": {
+            "description": "El cuerpo de la solicitud supera el límite de 4096 bytes."
+          },
+          "422": {
+            "description": "Los datos, la validación de nombre o la jerarquía no son válidos."
+          },
+          "429": {
+            "description": "Límite de solicitudes por Gateway excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "parent_id",
+            "in": "query",
+            "required": false,
+            "description": "Carpeta padre; si se omite se listan las carpetas raíz.",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Número de página (25 carpetas por página).",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000,
+              "default": 1
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "createFolder",
+        "summary": "Crear carpeta de la junta activa",
+        "description": "Endpoint público en la frontera HTTP (no anónimo). Requiere cookie de sesión SRD, CSRF para mutaciones y permisos del servicio Files. Requiere folders.manage. El identificador UUID suministrado permite repetición idempotente si la carpeta existente pertenece a la junta y coincide con el usuario, nombre y padre. Conflictos devuelven 409.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "name"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "not": {
+                      "const": "00000000-0000-0000-0000-000000000000"
+                    }
+                  },
+                  "parent_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "name_en": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderMutationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta contexto interno firmado válido o autenticación."
+          },
+          "403": {
+            "description": "Emisor, rol o permiso de Carpeta insuficiente."
+          },
+          "404": {
+            "description": "La carpeta de la junta activa o su ruta principal no existe."
+          },
+          "409": {
+            "description": "Conflicto de versión, jerarquía, duplicado o límite."
+          },
+          "413": {
+            "description": "El cuerpo de la solicitud supera el límite de 4096 bytes."
+          },
+          "422": {
+            "description": "Los datos, la validación de nombre o la jerarquía no son válidos."
+          },
+          "429": {
+            "description": "Límite de solicitudes por Gateway excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/folders/{id}": {
+      "patch": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "renameFolder",
+        "summary": "Renombrar carpeta con versión",
+        "description": "Endpoint público en la frontera HTTP (no anónimo). Requiere cookie de sesión SRD, CSRF para mutaciones y permisos del servicio Files. Requiere folders.manage. La versión debe coincidir; al cambiar el nombre se incrementa la versión y se registra evento Outbox.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "version"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "name_en": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483646
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderMutationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta contexto interno firmado válido o autenticación."
+          },
+          "403": {
+            "description": "Emisor, rol o permiso de Carpeta insuficiente."
+          },
+          "404": {
+            "description": "La carpeta de la junta activa o su ruta principal no existe."
+          },
+          "409": {
+            "description": "Conflicto de versión, jerarquía, duplicado o límite."
+          },
+          "413": {
+            "description": "El cuerpo de la solicitud supera el límite de 4096 bytes."
+          },
+          "422": {
+            "description": "Los datos, la validación de nombre o la jerarquía no son válidos."
+          },
+          "429": {
+            "description": "Límite de solicitudes por Gateway excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Identificador UUID de una carpeta dentro de la junta activa."
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "deleteFolder",
+        "summary": "Eliminar carpeta vacía con confirmación",
+        "description": "Endpoint público en la frontera HTTP (no anónimo). Requiere cookie de sesión SRD, CSRF para mutaciones y permisos del servicio Files. Requiere folders.manage. El cuerpo exige confirm=true y versión; no elimina carpetas con subcarpetas o documentos, incluso cargas pendientes.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "version",
+                  "confirm"
+                ],
+                "properties": {
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483646
+                  },
+                  "confirm": {
+                    "type": "boolean",
+                    "const": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderDeletedResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta contexto interno firmado válido o autenticación."
+          },
+          "403": {
+            "description": "Emisor, rol o permiso de Carpeta insuficiente."
+          },
+          "404": {
+            "description": "La carpeta de la junta activa o su ruta principal no existe."
+          },
+          "409": {
+            "description": "Conflicto de versión, jerarquía, duplicado o límite."
+          },
+          "413": {
+            "description": "El cuerpo de la solicitud supera el límite de 4096 bytes."
+          },
+          "422": {
+            "description": "Los datos, la validación de nombre o la jerarquía no son válidos."
+          },
+          "429": {
+            "description": "Límite de solicitudes por Gateway excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Identificador UUID de una carpeta dentro de la junta activa."
+          }
+        ]
+      }
+    },
+    "/folders/{id}/move": {
+      "post": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "moveFolder",
+        "summary": "Mover carpeta dentro de la junta",
+        "description": "Endpoint público en la frontera HTTP (no anónimo). Requiere cookie de sesión SRD, CSRF para mutaciones y permisos del servicio Files. Requiere folders.manage. parent_id está presente incluso para la raíz (null); valida versión, ciclos y profundidad máxima de 20 niveles.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "parent_id",
+                  "version"
+                ],
+                "properties": {
+                  "parent_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid"
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483646
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderMutationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta contexto interno firmado válido o autenticación."
+          },
+          "403": {
+            "description": "Emisor, rol o permiso de Carpeta insuficiente."
+          },
+          "404": {
+            "description": "La carpeta de la junta activa o su ruta principal no existe."
+          },
+          "409": {
+            "description": "Conflicto de versión, jerarquía, duplicado o límite."
+          },
+          "413": {
+            "description": "El cuerpo de la solicitud supera el límite de 4096 bytes."
+          },
+          "422": {
+            "description": "Los datos, la validación de nombre o la jerarquía no son válidos."
+          },
+          "429": {
+            "description": "Límite de solicitudes por Gateway excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Identificador UUID de una carpeta dentro de la junta activa."
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -22445,6 +23119,332 @@
               "pending",
               "active"
             ]
+          }
+        }
+      },
+      "FolderItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "parent_id",
+          "name",
+          "version",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parent_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "name_en": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 120
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "created_at": {
+            "type": "string",
+            "description": "Fecha/hora del registro serializada por Laravel."
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Fecha/hora de última modificación serializada por Laravel."
+          }
+        },
+        "description": "Campos compartidos de carpeta; el servicio puede devolver otros campos de su registro interno."
+      },
+      "FolderBreadcrumb": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "name_en"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "name_en": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 120
+          }
+        }
+      },
+      "FolderListResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "items",
+              "total",
+              "page",
+              "page_size",
+              "breadcrumbs"
+            ],
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FolderItem"
+                }
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "page_size": {
+                "type": "integer",
+                "const": 25
+              },
+              "breadcrumbs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FolderBreadcrumb"
+                }
+              }
+            }
+          }
+        }
+      },
+      "FolderMutationResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/FolderItem"
+          }
+        }
+      },
+      "FolderDeletedResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "id",
+              "deleted"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "deleted": {
+                "type": "boolean",
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "FolderReaderMembership": {
+        "type": "object",
+        "required": [
+          "id",
+          "version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          }
+        }
+      },
+      "FolderAccessSettings": {
+        "type": "object",
+        "required": [
+          "version",
+          "reader_roles",
+          "reader_memberships",
+          "can_manage",
+          "can_read"
+        ],
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "reader_roles": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "registrar",
+                "treasurer",
+                "auditor",
+                "viewer"
+              ]
+            }
+          },
+          "reader_memberships": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FolderReaderMembership"
+            }
+          },
+          "can_manage": {
+            "type": "boolean"
+          },
+          "can_read": {
+            "type": "boolean"
+          }
+        }
+      },
+      "FolderAccessResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/FolderAccessSettings"
+          }
+        }
+      },
+      "FolderDocumentSearchItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "folder_id",
+          "name",
+          "mime",
+          "bytes",
+          "sha256",
+          "version",
+          "folder_path",
+          "folder_path_en"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "folder_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "mime": {
+            "type": "string"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "folder_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "folder_name_en": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "folder_path": {
+            "type": "string",
+            "description": "Ruta relativa para mostrar desde Inicio o aviso de ubicación no disponible."
+          },
+          "folder_path_en": {
+            "type": "string",
+            "description": "Ruta relativa en inglés o aviso de ubicación no disponible."
+          }
+        }
+      },
+      "FolderDocumentSearchResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "items",
+              "total",
+              "page_size",
+              "page"
+            ],
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FolderDocumentSearchItem"
+                }
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "page_size": {
+                "type": "integer",
+                "const": 25
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
           }
         }
       }

@@ -28,10 +28,6 @@
                                       "rationale":  "services/identity/routes/api.php: routes are in middleware(internal); shared packages/php/src/InternalAuth.php verifies signed service context.",
                                       "routes":  [
                                                      {
-                                                         "operation":  "POST /members/folder-readers/verify",
-                                                         "category":  "internal"
-                                                     },
-                                                     {
                                                          "operation":  "POST /persons/{id}/detach-for-erasure",
                                                          "category":  "internal"
                                                      },

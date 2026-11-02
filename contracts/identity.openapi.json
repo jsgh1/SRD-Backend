@@ -4577,6 +4577,144 @@
           }
         }
       }
+    },
+    "/members/folder-readers/verify": {
+      "post": {
+        "summary": "Verificar membresías elegibles para lectores de carpeta",
+        "description": "Endpoint interno protegido por el middleware internal. Requiere contexto de servicio firmado, vigente, de audiencia Identity y ligado a método, ruta, hash del cuerpo y nonce. InternalAuth admite emisores gateway, identity, configuration, records y audit; el consumidor confirmado en Gateway es folderAccessUpdate (issuer gateway). La ruta no fija por sí misma un emisor único. Access::require exige user_id y organization_id y el permiso members.manage (roles superadmin o admin). La organización se toma del contexto firmado, nunca del cuerpo. ids son UUID de membresías, no de usuarios. Cada membresía y cuenta debe estar activa y la membresía debe tener rol registrar, treasurer, auditor o viewer. La respuesta contiene únicamente id y version de cada membresía validada, en el mismo orden solicitado. Si cualquier ID no existe, no es elegible o pertenece a otra junta, se responde 422 para no devolver una lista parcial. Una lista vacía es válida y devuelve items vacío.",
+        "operationId": "internal_post_folder_reader_membership_verification",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "ids"
+                ],
+                "properties": {
+                  "ids": {
+                    "type": "array",
+                    "minItems": 0,
+                    "maxItems": 20,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "description": "Lista de IDs de membresía distintos para validar; admite de 0 a 20 elementos."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Todas las membresías solicitadas son elegibles; items conserva el orden de ids y contiene solo el identificador de membresía y su versión.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "items"
+                      ],
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "id",
+                              "version"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid",
+                                "description": "ID de la membresía validada."
+                              },
+                              "version": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "description": "Versión vigente de la membresía para control optimista en Files."
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "El contexto de servicio está ausente, vencido, reutilizado o no coincide con audiencia, método, ruta o cuerpo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El principal no aporta user_id y organization_id o su rol no tiene members.manage.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El cuerpo no incluye una lista válida de hasta 20 UUID distintos, o al menos una membresía no existe, está inactiva, no tiene cuenta activa, tiene un rol no elegible o pertenece a otra junta. No se devuelve un resultado parcial.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error inesperado al consultar las membresías.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

@@ -246,15 +246,7 @@
                                                       "category":  "internal"
                                                   },
                                                   {
-                                                      "operation":  "DELETE /folders/{id}",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
                                                       "operation":  "DELETE /users/{id}/photos/{slot}",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
-                                                      "operation":  "GET /antivirus-status",
                                                       "category":  "internal"
                                                   },
                                                   {
@@ -274,10 +266,6 @@
                                                       "category":  "internal"
                                                   },
                                                   {
-                                                      "operation":  "GET /folders",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
                                                       "operation":  "GET /users/{id}/photos",
                                                       "category":  "internal"
                                                   },
@@ -290,23 +278,11 @@
                                                       "category":  "internal"
                                                   },
                                                   {
-                                                      "operation":  "PATCH /folders/{id}",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
                                                       "operation":  "POST /chat-attachments",
                                                       "category":  "internal"
                                                   },
                                                   {
                                                       "operation":  "POST /folder-documents/{id}/move",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
-                                                      "operation":  "POST /folders",
-                                                      "category":  "internal"
-                                                  },
-                                                  {
-                                                      "operation":  "POST /folders/{id}/move",
                                                       "category":  "internal"
                                                   },
                                                   {

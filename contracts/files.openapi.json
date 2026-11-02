@@ -202,6 +202,179 @@
             }
           }
         }
+      },
+      "FolderItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "parent_id",
+          "name",
+          "version",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parent_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "name_en": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 120
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "created_at": {
+            "type": "string",
+            "description": "Fecha/hora del registro serializada por Laravel."
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Fecha/hora de última modificación serializada por Laravel."
+          }
+        },
+        "description": "Campos compartidos de carpeta; el servicio puede devolver otros campos de su registro interno."
+      },
+      "FolderBreadcrumb": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "name_en"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "name_en": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 120
+          }
+        }
+      },
+      "FolderListResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "items",
+              "total",
+              "page",
+              "page_size",
+              "breadcrumbs"
+            ],
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FolderItem"
+                }
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "page": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "page_size": {
+                "type": "integer",
+                "const": 25
+              },
+              "breadcrumbs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FolderBreadcrumb"
+                }
+              }
+            }
+          }
+        }
+      },
+      "FolderMutationResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/FolderItem"
+          }
+        }
+      },
+      "FolderDeletedResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "id",
+              "deleted"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "deleted": {
+                "type": "boolean",
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "AntivirusStatusResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "available"
+            ],
+            "properties": {
+              "available": {
+                "type": "boolean",
+                "description": "Disponibilidad actual del escáner y de las firmas requeridas."
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -2010,6 +2183,451 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/folders": {
+      "get": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "listFoldersInternal",
+        "summary": "Listar carpetas de la junta activa",
+        "description": "Requiere contexto firmado del Gateway y folders.manage o permiso delegado de lectura. Filtra únicamente por la junta activa y devuelve 25 resultados por página.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta contexto interno firmado válido o autenticación."
+          },
+          "403": {
+            "description": "Emisor, rol o permiso de Carpeta insuficiente."
+          },
+          "404": {
+            "description": "La carpeta de la junta activa o su ruta principal no existe."
+          },
+          "409": {
+            "description": "Conflicto de versión, jerarquía, duplicado o límite."
+          },
+          "413": {
+            "description": "El cuerpo de la solicitud supera el límite de 4096 bytes."
+          },
+          "422": {
+            "description": "Los datos, la validación de nombre o la jerarquía no son válidos."
+          }
+        },
+        "parameters": [
+          {
+            "name": "parent_id",
+            "in": "query",
+            "required": false,
+            "description": "Carpeta padre; si se omite se listan las carpetas raíz.",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Número de página (25 carpetas por página).",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000,
+              "default": 1
+            }
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "createFolderInternal",
+        "summary": "Crear carpeta de la junta activa",
+        "description": "Requiere folders.manage. El identificador UUID suministrado permite repetición idempotente si la carpeta existente pertenece a la junta y coincide con el usuario, nombre y padre. Conflictos devuelven 409.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "name"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "not": {
+                      "const": "00000000-0000-0000-0000-000000000000"
+                    }
+                  },
+                  "parent_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "name_en": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "minLength": 1,
+                    "maxLength": 120
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderMutationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta contexto interno firmado válido o autenticación."
+          },
+          "403": {
+            "description": "Emisor, rol o permiso de Carpeta insuficiente."
+          },
+          "404": {
+            "description": "La carpeta de la junta activa o su ruta principal no existe."
+          },
+          "409": {
+            "description": "Conflicto de versión, jerarquía, duplicado o límite."
+          },
+          "413": {
+            "description": "El cuerpo de la solicitud supera el límite de 4096 bytes."
+          },
+          "422": {
+            "description": "Los datos, la validación de nombre o la jerarquía no son válidos."
+          }
+        }
+      }
+    },
+    "/folders/{id}": {
+      "patch": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "renameFolderInternal",
+        "summary": "Renombrar carpeta con versión",
+        "description": "Requiere folders.manage. La versión debe coincidir; al cambiar el nombre se incrementa la versión y se registra evento Outbox.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "version"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "name_en": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483646
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderMutationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta contexto interno firmado válido o autenticación."
+          },
+          "403": {
+            "description": "Emisor, rol o permiso de Carpeta insuficiente."
+          },
+          "404": {
+            "description": "La carpeta de la junta activa o su ruta principal no existe."
+          },
+          "409": {
+            "description": "Conflicto de versión, jerarquía, duplicado o límite."
+          },
+          "413": {
+            "description": "El cuerpo de la solicitud supera el límite de 4096 bytes."
+          },
+          "422": {
+            "description": "Los datos, la validación de nombre o la jerarquía no son válidos."
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Identificador UUID de una carpeta dentro de la junta activa."
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "deleteFolderInternal",
+        "summary": "Eliminar carpeta vacía con confirmación",
+        "description": "Requiere folders.manage. El cuerpo exige confirm=true y versión; no elimina carpetas con subcarpetas o documentos, incluso cargas pendientes.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "version",
+                  "confirm"
+                ],
+                "properties": {
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483646
+                  },
+                  "confirm": {
+                    "type": "boolean",
+                    "const": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderDeletedResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta contexto interno firmado válido o autenticación."
+          },
+          "403": {
+            "description": "Emisor, rol o permiso de Carpeta insuficiente."
+          },
+          "404": {
+            "description": "La carpeta de la junta activa o su ruta principal no existe."
+          },
+          "409": {
+            "description": "Conflicto de versión, jerarquía, duplicado o límite."
+          },
+          "413": {
+            "description": "El cuerpo de la solicitud supera el límite de 4096 bytes."
+          },
+          "422": {
+            "description": "Los datos, la validación de nombre o la jerarquía no son válidos."
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Identificador UUID de una carpeta dentro de la junta activa."
+          }
+        ]
+      }
+    },
+    "/folders/{id}/move": {
+      "post": {
+        "tags": [
+          "Carpeta"
+        ],
+        "operationId": "moveFolderInternal",
+        "summary": "Mover carpeta dentro de la junta",
+        "description": "Requiere folders.manage. parent_id está presente incluso para la raíz (null); valida versión, ciclos y profundidad máxima de 20 niveles.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "parent_id",
+                  "version"
+                ],
+                "properties": {
+                  "parent_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid"
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483646
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderMutationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta contexto interno firmado válido o autenticación."
+          },
+          "403": {
+            "description": "Emisor, rol o permiso de Carpeta insuficiente."
+          },
+          "404": {
+            "description": "La carpeta de la junta activa o su ruta principal no existe."
+          },
+          "409": {
+            "description": "Conflicto de versión, jerarquía, duplicado o límite."
+          },
+          "413": {
+            "description": "El cuerpo de la solicitud supera el límite de 4096 bytes."
+          },
+          "422": {
+            "description": "Los datos, la validación de nombre o la jerarquía no son válidos."
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Identificador UUID de una carpeta dentro de la junta activa."
+          }
+        ]
+      }
+    },
+    "/antivirus-status": {
+      "get": {
+        "tags": [
+          "Seguridad operativa"
+        ],
+        "operationId": "getAntivirusStatusInternal",
+        "summary": "Consultar disponibilidad del antivirus de Files",
+        "description": "Ruta interna que exige contexto firmado y emisor gateway. Devuelve available como booleano; el valor false no se transforma automáticamente en un HTTP 503.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operación completada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AntivirusStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Falta contexto interno firmado válido o autenticación."
+          },
+          "403": {
+            "description": "Emisor, rol o permiso de Carpeta insuficiente."
           }
         }
       }

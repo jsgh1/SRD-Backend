@@ -1458,961 +1458,40 @@
         ]
       }
     },
-    "/auth/login": {
+    "/auth/{action}": {
       "post": {
-        "summary": "Validar credenciales sin emitir sesión",
-        "operationId": "post_auth_login",
-        "security": [],
-        "responses": {
-          "200": {
-            "description": "Resultado confirmado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "data",
-                    "meta"
-                  ],
-                  "properties": {
-                    "data": {},
-                    "meta": {
-                      "type": "object",
-                      "properties": {
-                        "correlation_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        }
-                      },
-                      "required": [
-                        "correlation_id"
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error normalizado 401",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error normalizado 403",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Error normalizado 404",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Error normalizado 409",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "419": {
-            "description": "Error normalizado 419",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Error normalizado 422",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Error normalizado 429",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Error normalizado 503",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Login"
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "X-CSRF-TOKEN",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Obtener de /csrf; renovar tras /auth/verify y logout."
-          }
-        ]
-      }
-    },
-    "/auth/verify": {
-      "post": {
-        "summary": "Consumir código y establecer sesión HttpOnly",
-        "operationId": "post_auth_verify",
-        "security": [],
-        "responses": {
-          "200": {
-            "description": "Resultado confirmado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "data",
-                    "meta"
-                  ],
-                  "properties": {
-                    "data": {},
-                    "meta": {
-                      "type": "object",
-                      "properties": {
-                        "correlation_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        }
-                      },
-                      "required": [
-                        "correlation_id"
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error normalizado 401",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error normalizado 403",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Error normalizado 404",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Error normalizado 409",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "419": {
-            "description": "Error normalizado 419",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Error normalizado 422",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Error normalizado 429",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Error normalizado 503",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Verify"
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "X-CSRF-TOKEN",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Obtener de /csrf; renovar tras /auth/verify y logout."
-          }
-        ]
-      }
-    },
-    "/auth/resend": {
-      "post": {
-        "summary": "Reenviar sujeto a 60 segundos y cinco envíos por hora",
-        "operationId": "post_auth_resend",
-        "security": [],
-        "responses": {
-          "200": {
-            "description": "Resultado confirmado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "data",
-                    "meta"
-                  ],
-                  "properties": {
-                    "data": {},
-                    "meta": {
-                      "type": "object",
-                      "properties": {
-                        "correlation_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        }
-                      },
-                      "required": [
-                        "correlation_id"
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error normalizado 401",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error normalizado 403",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Error normalizado 404",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Error normalizado 409",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "419": {
-            "description": "Error normalizado 419",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Error normalizado 422",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Error normalizado 429",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Error normalizado 503",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Challenge"
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "X-CSRF-TOKEN",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Obtener de /csrf; renovar tras /auth/verify y logout."
-          }
-        ]
-      }
-    },
-    "/auth/cancel": {
-      "post": {
-        "summary": "Cancelar desafío ligado a la sesión de navegador",
-        "operationId": "post_auth_cancel",
-        "security": [],
-        "responses": {
-          "200": {
-            "description": "Resultado confirmado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "data",
-                    "meta"
-                  ],
-                  "properties": {
-                    "data": {},
-                    "meta": {
-                      "type": "object",
-                      "properties": {
-                        "correlation_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        }
-                      },
-                      "required": [
-                        "correlation_id"
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error normalizado 401",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error normalizado 403",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Error normalizado 404",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Error normalizado 409",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "419": {
-            "description": "Error normalizado 419",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Error normalizado 422",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Error normalizado 429",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Error normalizado 503",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Challenge"
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "X-CSRF-TOKEN",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Obtener de /csrf; renovar tras /auth/verify y logout."
-          }
-        ]
-      }
-    },
-    "/auth/recover": {
-      "post": {
-        "summary": "Solicitar recuperación con respuesta genérica",
-        "operationId": "post_auth_recover",
-        "security": [],
-        "responses": {
-          "200": {
-            "description": "Resultado confirmado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "data",
-                    "meta"
-                  ],
-                  "properties": {
-                    "data": {},
-                    "meta": {
-                      "type": "object",
-                      "properties": {
-                        "correlation_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        }
-                      },
-                      "required": [
-                        "correlation_id"
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error normalizado 401",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error normalizado 403",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Error normalizado 404",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Error normalizado 409",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "419": {
-            "description": "Error normalizado 419",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Error normalizado 422",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Error normalizado 429",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Error normalizado 503",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Recover"
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "X-CSRF-TOKEN",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Obtener de /csrf; renovar tras /auth/verify y logout."
-          }
-        ]
-      }
-    },
-    "/auth/reset": {
-      "post": {
-        "summary": "Consumir enlace y revocar sesiones",
-        "operationId": "post_auth_reset",
-        "security": [],
-        "responses": {
-          "200": {
-            "description": "Resultado confirmado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "data",
-                    "meta"
-                  ],
-                  "properties": {
-                    "data": {},
-                    "meta": {
-                      "type": "object",
-                      "properties": {
-                        "correlation_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        }
-                      },
-                      "required": [
-                        "correlation_id"
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error normalizado 401",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error normalizado 403",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Error normalizado 404",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Error normalizado 409",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "419": {
-            "description": "Error normalizado 419",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Error normalizado 422",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Error normalizado 429",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Error normalizado 503",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Reset"
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "X-CSRF-TOKEN",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Obtener de /csrf; renovar tras /auth/verify y logout."
-          }
-        ]
-      }
-    },
-    "/auth/logout": {
-      "post": {
-        "summary": "Revocar sesión actual",
-        "operationId": "post_auth_logout",
+        "summary": "Execute a browser authentication action",
+        "description": "Single public Gateway endpoint for login, MFA, recovery, and browser-session actions. The browser session stays in an HttpOnly cookie and each request sends X-CSRF-TOKEN. Identity credentials and internal session or membership identifiers are never returned. login, verify, resend, and cancel use the challenge bound to the browser session; logout, revokeOthers, and switchOrganization require an authenticated session. The Gateway limits this route to 20 requests per minute. Identity additionally limits login to 10 attempts per email per five minutes, challenge issuance/resend to one per 60 seconds and five per user and purpose per hour, recovery requests to five per email per hour with a generic response, and verification to five failed codes per challenge.",
+        "operationId": "post_auth_action",
+        "tags": [
+          "Autenticaci?n"
+        ],
         "security": [
           {
             "session": []
           }
         ],
-        "responses": {
-          "200": {
-            "description": "Resultado confirmado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "data",
-                    "meta"
-                  ],
-                  "properties": {
-                    "data": {},
-                    "meta": {
-                      "type": "object",
-                      "properties": {
-                        "correlation_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        }
-                      },
-                      "required": [
-                        "correlation_id"
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error normalizado 401",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error normalizado 403",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Error normalizado 404",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Error normalizado 409",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "419": {
-            "description": "Error normalizado 419",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Error normalizado 422",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Error normalizado 429",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Error normalizado 503",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
         "parameters": [
+          {
+            "name": "action",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "login",
+                "verify",
+                "resend",
+                "cancel",
+                "recover",
+                "reset",
+                "logout",
+                "revokeOthers",
+                "switchOrganization"
+              ]
+            },
+            "description": "Supported Identity action forwarded by the Gateway."
+          },
           {
             "name": "X-CSRF-TOKEN",
             "in": "header",
@@ -2420,283 +1499,445 @@
             "schema": {
               "type": "string"
             },
-            "description": "Obtener de /csrf; renovar tras /auth/verify y logout."
-          }
-        ]
-      }
-    },
-    "/auth/revokeOthers": {
-      "post": {
-        "summary": "Revocar otras sesiones",
-        "operationId": "post_auth_revokeOthers",
-        "security": [
-          {
-            "session": []
+            "description": "CSRF token obtained from GET /csrf."
           }
         ],
-        "responses": {
-          "200": {
-            "description": "Resultado confirmado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "data",
-                    "meta"
-                  ],
-                  "properties": {
-                    "data": {},
-                    "meta": {
-                      "type": "object",
-                      "properties": {
-                        "correlation_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        }
-                      },
-                      "required": [
-                        "correlation_id"
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error normalizado 401",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error normalizado 403",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Error normalizado 404",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Error normalizado 409",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "419": {
-            "description": "Error normalizado 419",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Error normalizado 422",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Error normalizado 429",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Error normalizado 503",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "X-CSRF-TOKEN",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Obtener de /csrf; renovar tras /auth/verify y logout."
-          }
-        ]
-      }
-    },
-    "/auth/switchOrganization": {
-      "post": {
-        "summary": "Validar membresía y aceptar términos de destino",
-        "operationId": "post_auth_switchOrganization",
-        "security": [
-          {
-            "session": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Resultado confirmado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "data",
-                    "meta"
-                  ],
-                  "properties": {
-                    "data": {},
-                    "meta": {
-                      "type": "object",
-                      "properties": {
-                        "correlation_id": {
-                          "type": "string",
-                          "format": "uuid"
-                        }
-                      },
-                      "required": [
-                        "correlation_id"
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Error normalizado 401",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Error normalizado 403",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Error normalizado 404",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Error normalizado 409",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "419": {
-            "description": "Error normalizado 419",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Error normalizado 422",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Error normalizado 429",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Error normalizado 503",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
         "requestBody": {
-          "required": true,
+          "required": false,
+          "description": "JSON body varies by action. logout and revokeOthers accept an omitted or empty body.",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Switch"
+                "oneOf": [
+                  {
+                    "x-srd-action": "login",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/Login"
+                      }
+                    ]
+                  },
+                  {
+                    "x-srd-action": "verify",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/Verify"
+                      }
+                    ]
+                  },
+                  {
+                    "x-srd-action": "resend",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/Challenge"
+                      }
+                    ]
+                  },
+                  {
+                    "x-srd-action": "cancel",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/Challenge"
+                      }
+                    ]
+                  },
+                  {
+                    "x-srd-action": "recover",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/Recover"
+                      }
+                    ]
+                  },
+                  {
+                    "x-srd-action": "reset",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/Reset"
+                      }
+                    ]
+                  },
+                  {
+                    "x-srd-action": "logout",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/AuthEmptyRequest"
+                      }
+                    ]
+                  },
+                  {
+                    "x-srd-action": "revokeOthers",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/AuthEmptyRequest"
+                      }
+                    ]
+                  },
+                  {
+                    "x-srd-action": "switchOrganization",
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/Switch"
+                      }
+                    ]
+                  }
+                ]
               }
             }
           }
         },
-        "parameters": [
+        "responses": {
+          "200": {
+            "description": "Successful action. login and resend return a new challenge; verify returns the public principal and establishes the browser session; recover returns a generic acknowledgement; cancel, reset, logout, revokeOthers, and switchOrganization return an empty data array.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "oneOf": [
+                        {
+                          "x-srd-action": "login",
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/AuthChallengeIssued"
+                            }
+                          ]
+                        },
+                        {
+                          "x-srd-action": "verify",
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/AuthPublicPrincipal"
+                            }
+                          ]
+                        },
+                        {
+                          "x-srd-action": "resend",
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/AuthChallengeIssued"
+                            }
+                          ]
+                        },
+                        {
+                          "x-srd-action": "cancel",
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/AuthEmptyData"
+                            }
+                          ]
+                        },
+                        {
+                          "x-srd-action": "recover",
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/AuthRecoveryAcknowledgement"
+                            }
+                          ]
+                        },
+                        {
+                          "x-srd-action": "reset",
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/AuthEmptyData"
+                            }
+                          ]
+                        },
+                        {
+                          "x-srd-action": "logout",
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/AuthEmptyData"
+                            }
+                          ]
+                        },
+                        {
+                          "x-srd-action": "revokeOthers",
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/AuthEmptyData"
+                            }
+                          ]
+                        },
+                        {
+                          "x-srd-action": "switchOrganization",
+                          "allOf": [
+                            {
+                              "$ref": "#/components/schemas/AuthEmptyData"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed or the current session is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The action is not permitted, or the session needs current terms acceptance.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown action or organization.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The submitted organization terms version is stale.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "The browser CSRF token is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request validation failed or a challenge is invalid, expired, consumed, or no longer bound to this browser session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The Gateway or Identity rate limit was reached.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A required Identity, configuration, or mail dependency is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "x-srd-auth-action-contracts": [
           {
-            "name": "X-CSRF-TOKEN",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Obtener de /csrf; renovar tras /auth/verify y logout."
+            "action": "login",
+            "request": "#/components/schemas/Login",
+            "response": "#/components/schemas/AuthChallengeIssued",
+            "session": "anonymous",
+            "behavior": "Checks credentials and current terms, then issues an MFA challenge without creating an authenticated session.",
+            "limits": [
+              "Gateway: 20 requests/minute",
+              "Identity: 10 attempts/email/5 minutes",
+              "Challenge: at least 60 seconds between issues and five per user/purpose/hour"
+            ],
+            "errors": [
+              "401",
+              "403",
+              "404",
+              "409",
+              "419",
+              "422",
+              "429",
+              "503"
+            ]
+          },
+          {
+            "action": "verify",
+            "request": "#/components/schemas/Verify",
+            "response": "#/components/schemas/AuthPublicPrincipal",
+            "session": "challenge",
+            "behavior": "Consumes the current browser-bound MFA challenge, then establishes the HttpOnly session and returns the public principal.",
+            "limits": [
+              "Gateway: 20 requests/minute",
+              "Challenge: at most five failed codes"
+            ],
+            "errors": [
+              "401",
+              "403",
+              "419",
+              "422",
+              "429",
+              "503"
+            ]
+          },
+          {
+            "action": "resend",
+            "request": "#/components/schemas/Challenge",
+            "response": "#/components/schemas/AuthChallengeIssued",
+            "session": "challenge",
+            "behavior": "Consumes/replaces the current browser-bound challenge and issues a fresh challenge.",
+            "limits": [
+              "Gateway: 20 requests/minute",
+              "Challenge: at least 60 seconds between issues and five per user/purpose/hour"
+            ],
+            "errors": [
+              "401",
+              "403",
+              "404",
+              "409",
+              "419",
+              "422",
+              "429",
+              "503"
+            ]
+          },
+          {
+            "action": "cancel",
+            "request": "#/components/schemas/Challenge",
+            "response": "#/components/schemas/AuthEmptyData",
+            "session": "challenge",
+            "behavior": "Consumes the challenge and clears it from the browser session.",
+            "limits": [
+              "Gateway: 20 requests/minute"
+            ],
+            "errors": [
+              "403",
+              "419",
+              "422",
+              "429",
+              "503"
+            ]
+          },
+          {
+            "action": "recover",
+            "request": "#/components/schemas/Recover",
+            "response": "#/components/schemas/AuthRecoveryAcknowledgement",
+            "session": "anonymous",
+            "behavior": "Requests password recovery. The success message is generic for unknown, throttled, or ineligible accounts.",
+            "limits": [
+              "Gateway: 20 requests/minute",
+              "Identity: five requests/email/hour"
+            ],
+            "errors": [
+              "419",
+              "422",
+              "429",
+              "503"
+            ]
+          },
+          {
+            "action": "reset",
+            "request": "#/components/schemas/Reset",
+            "response": "#/components/schemas/AuthEmptyData",
+            "session": "anonymous",
+            "behavior": "Consumes a one-time recovery challenge, updates the password, revokes active sessions, and returns no session identifiers.",
+            "limits": [
+              "Gateway: 20 requests/minute"
+            ],
+            "errors": [
+              "419",
+              "422",
+              "429",
+              "503"
+            ]
+          },
+          {
+            "action": "logout",
+            "request": "#/components/schemas/AuthEmptyRequest",
+            "response": "#/components/schemas/AuthEmptyData",
+            "session": "authenticated",
+            "behavior": "Revokes the current Identity session, clears the browser session, and returns no internal identifiers.",
+            "limits": [
+              "Gateway: 20 requests/minute"
+            ],
+            "errors": [
+              "401",
+              "403",
+              "419",
+              "429",
+              "503"
+            ]
+          },
+          {
+            "action": "revokeOthers",
+            "request": "#/components/schemas/AuthEmptyRequest",
+            "response": "#/components/schemas/AuthEmptyData",
+            "session": "authenticated",
+            "behavior": "Revokes other active sessions while retaining the current session; revoked IDs stay server-side.",
+            "limits": [
+              "Gateway: 20 requests/minute"
+            ],
+            "errors": [
+              "401",
+              "403",
+              "419",
+              "429",
+              "503"
+            ]
+          },
+          {
+            "action": "switchOrganization",
+            "request": "#/components/schemas/Switch",
+            "response": "#/components/schemas/AuthEmptyData",
+            "session": "authenticated",
+            "behavior": "Checks destination membership and terms, rotates the server credential and browser session, then returns no credential.",
+            "limits": [
+              "Gateway: 20 requests/minute"
+            ],
+            "errors": [
+              "401",
+              "403",
+              "404",
+              "409",
+              "419",
+              "422",
+              "429",
+              "503"
+            ]
           }
         ]
       }
@@ -2722,7 +1963,9 @@
                     "meta"
                   ],
                   "properties": {
-                    "data": {},
+                    "data": {
+                      "$ref": "#/components/schemas/AuthPublicPrincipal"
+                    },
                     "meta": {
                       "type": "object",
                       "properties": {
@@ -26547,10 +25790,14 @@
         "properties": {
           "email": {
             "type": "string",
-            "format": "email"
+            "format": "email",
+            "maxLength": 254
           },
           "organization_code": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[a-z0-9-]{3,40}$",
+            "minLength": 3,
+            "maxLength": 40
           }
         },
         "required": [
@@ -26568,7 +25815,8 @@
           "secret": {
             "type": "string",
             "minLength": 64,
-            "maxLength": 64
+            "maxLength": 64,
+            "pattern": "^[a-f0-9]{64}$"
           },
           "password": {
             "type": "string",
@@ -26590,7 +25838,10 @@
         "type": "object",
         "properties": {
           "organization_code": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[a-z0-9-]{3,40}$",
+            "minLength": 3,
+            "maxLength": 40
           },
           "terms_version_id": {
             "type": "string",
@@ -28665,6 +27916,213 @@
             ]
           }
         }
+      },
+      "AuthEmptyRequest": {
+        "type": "object",
+        "maxProperties": 0,
+        "additionalProperties": false,
+        "description": "Empty JSON object; the request body may also be omitted."
+      },
+      "AuthChallengeIssued": {
+        "type": "object",
+        "required": [
+          "challenge_id",
+          "expires_at",
+          "resend_after"
+        ],
+        "properties": {
+          "challenge_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resend_after": {
+            "type": "integer",
+            "minimum": 0,
+            "const": 60
+          }
+        }
+      },
+      "AuthRecoveryAcknowledgement": {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Respuesta gen?rica para no revelar si la cuenta existe."
+          }
+        },
+        "description": "Generic success response that does not reveal whether the account exists."
+      },
+      "AuthEmptyData": {
+        "type": "array",
+        "maxItems": 0,
+        "items": false,
+        "description": "The action completed and returns no data fields to the browser."
+      },
+      "AuthPublicPrincipal": {
+        "type": "object",
+        "required": [
+          "user_id",
+          "person_id",
+          "role",
+          "user",
+          "organization",
+          "terms_required"
+        ],
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "person_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "superadmin",
+              "admin",
+              "registrar",
+              "treasurer",
+              "auditor",
+              "viewer"
+            ]
+          },
+          "user": {
+            "type": "object",
+            "required": [
+              "name",
+              "email",
+              "theme",
+              "presence",
+              "language",
+              "title",
+              "title_en",
+              "bio",
+              "bio_en"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string",
+                "format": "email"
+              },
+              "theme": {
+                "type": "string"
+              },
+              "presence": {
+                "type": "string"
+              },
+              "language": {
+                "type": "string",
+                "enum": [
+                  "es",
+                  "en"
+                ]
+              },
+              "title": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "title_en": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "bio": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "bio_en": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "organization": {
+            "type": "object",
+            "required": [
+              "id",
+              "code",
+              "name",
+              "accent",
+              "version",
+              "terms"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "code": {
+                "type": "string",
+                "pattern": "^[a-z0-9-]{3,40}$"
+              },
+              "name": {
+                "type": "string"
+              },
+              "accent": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "terms": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "version",
+                  "body",
+                  "body_en"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "body": {
+                    "type": "string"
+                  },
+                  "body_en": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          },
+          "terms_required": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
       }
     }
   }

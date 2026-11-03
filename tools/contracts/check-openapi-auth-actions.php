@@ -389,6 +389,13 @@ function validateAuthActionContract(array $document): array
         }
     }
 
+    $verifyResponse = $mapped['verify']['response'] ?? null;
+    $meResponse = $paths['/me']['get']['responses']['200']['content']['application/json']['schema']['properties']['data'] ?? null;
+    if (!is_string($verifyResponse) || !is_array($meResponse)
+        || ($meResponse['$ref'] ?? null) !== $verifyResponse) {
+        authIssue($issues, 'GET /me data schema must match the public verify principal schema.');
+    }
+
     $refIssues = [];
     $visitedRefs = [];
     validateAuthRefs($document, $operation, 'Auth operation', $refIssues, $visitedRefs);
@@ -455,6 +462,14 @@ function validAuthActionFixture(): array
                 ]]],
                 'x-srd-auth-action-contracts' => $matrix,
             ]],
+            '/me' => ['get' => [
+                'operationId' => 'get_me',
+                'security' => [['session' => []]],
+                'responses' => ['200' => ['content' => ['application/json' => ['schema' => [
+                    'type' => 'object',
+                    'properties' => ['data' => ['$ref' => '#/components/schemas/Response_Verify']],
+                ]]]]],
+            ]],
         ],
         'components' => [
             'securitySchemes' => ['session' => ['type' => 'apiKey', 'in' => 'cookie', 'name' => 'srd_session']],
@@ -509,6 +524,11 @@ function runAuthActionSelfTest(): void
     assertAuthFixtureRejected('wrong response schema', $fixture, 'response mapping does not match');
 
     $fixture = $valid;
+    $fixture['paths']['/me']['get']['responses']['200']['content']['application/json']['schema']['properties']['data']['$ref']
+        = '#/components/schemas/Response_Login';
+    assertAuthFixtureRejected('me principal mismatch', $fixture, 'GET /me data schema must match');
+
+    $fixture = $valid;
     unset($fixture['paths']['/auth/{action}']['post']['x-srd-auth-action-contracts'][0]['request']);
     assertAuthFixtureRejected('missing schema', $fixture, 'missing its request schema');
 
@@ -533,7 +553,7 @@ function runAuthActionSelfTest(): void
     $fixture['paths']['/other'] = ['get' => ['operationId' => 'post_auth_action', 'responses' => []]];
     assertAuthFixtureRejected('duplicate operationId', $fixture, 'Duplicate operationId');
 
-    fwrite(STDOUT, "Auth action contract checker self-test passed (1 positive, 12 negative fixtures).\n");
+    fwrite(STDOUT, "Auth action contract checker self-test passed (1 positive, 13 negative fixtures).\n");
 }
 
 function readAuthContract(string $path): array

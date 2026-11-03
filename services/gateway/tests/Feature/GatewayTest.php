@@ -11,6 +11,64 @@ final class GatewayTest extends TestCase
 {
     use SignedRequests;
 
+    public function test_verify_returns_allowlisted_public_principal_and_keeps_identity_token_in_server_session(): void
+    {
+        $challengeId = '11111111-1111-4111-8111-111111111111';
+        $identityToken = str_repeat('a', 64);
+        $internal = $this->identityPrincipalFixture();
+        Http::fake(function ($request) use ($identityToken, $internal) {
+            $path = parse_url($request->url(), PHP_URL_PATH);
+            if (str_ends_with($path, '/auth/verify')) {
+                return Http::response(['data' => ['token' => $identityToken]], 200);
+            }
+            if (str_ends_with($path, '/auth/me')) {
+                return Http::response(['data' => $internal], 200);
+            }
+
+            return Http::response([], 404);
+        });
+
+        $response = $this->withSession(['challenge_id' => $challengeId])
+            ->postJson('/api/v1/auth/verify', ['challenge_id' => $challengeId, 'code' => '123456'])
+            ->assertOk();
+
+        $this->assertSame($this->publicPrincipalFixture(), $response->json('data'));
+        $response->assertSessionHas('credential', $identityToken)->assertSessionMissing('challenge_id');
+        foreach (['session_id', 'organization_id', 'membership_id', 'membership_version', 'internal_flag'] as $field) {
+            $response->assertJsonMissingPath('data.'.$field);
+        }
+        $response->assertJsonMissingPath('data.organization.active')
+            ->assertJsonMissingPath('data.organization.created_at')
+            ->assertJsonMissingPath('data.organization.terms.organization_id')
+            ->assertJsonMissingPath('data.token')
+            ->assertDontSee($identityToken)
+            ->assertDontSee('44444444-4444-4444-8444-444444444444')
+            ->assertDontSee('33333333-3333-4333-8333-333333333333')
+            ->assertDontSee('private-principal-value');
+
+        Http::assertSent(fn ($request) => str_ends_with(parse_url($request->url(), PHP_URL_PATH), '/auth/me')
+            && $request['token'] === $identityToken);
+        Http::assertSent(fn ($request) => str_ends_with(parse_url($request->url(), PHP_URL_PATH), '/auth/verify')
+            && $request['challenge_id'] === $challengeId && $request['code'] === '123456');
+    }
+
+    public function test_me_returns_the_same_public_principal_shape_while_terms_acceptance_is_required(): void
+    {
+        $internal = $this->identityPrincipalFixture(termsRequired: true);
+        Http::fake(fn ($request) => str_ends_with(parse_url($request->url(), PHP_URL_PATH), '/auth/me')
+            ? Http::response(['data' => $internal], 200)
+            : Http::response([], 404));
+
+        $response = $this->withSession(['credential' => 'server-side-credential'])
+            ->getJson('/api/v1/me')
+            ->assertOk();
+
+        $this->assertSame($this->publicPrincipalFixture(termsRequired: true), $response->json('data'));
+        $response->assertDontSee('private-principal-value');
+        Http::assertSent(fn ($request) => str_ends_with(parse_url($request->url(), PHP_URL_PATH), '/auth/me')
+            && $request['token'] === 'server-side-credential');
+    }
+
     public function test_public_council_config_includes_its_logo_without_requiring_login(): void
     {
         $id = '11111111-1111-4111-8111-111111111111';
@@ -491,8 +549,9 @@ final class GatewayTest extends TestCase
         $org = '11111111-1111-4111-8111-111111111111';
         $user = '22222222-2222-4222-8222-222222222222';
         $session = '44444444-4444-4444-8444-444444444444';
+        $broadcastUserId = hash_hmac('sha256', 'srd-reverb-session:'.$session, 'private-secret');
         $channel = 'presence-chat.'.$org.'.'.$user;
-        $channelData = json_encode(['user_id' => $session]);
+        $channelData = json_encode(['user_id' => $broadcastUserId]);
         Http::fake(fn ($request) => Http::response(['data' => [
             'user_id' => $user, 'organization_id' => $org, 'session_id' => $session,
             'role' => 'viewer', 'terms_required' => false,
@@ -511,7 +570,8 @@ final class GatewayTest extends TestCase
             'socket_id' => '123.456', 'channel_name' => $channel,
         ])->assertOk()->assertJsonPath('data.channel_data', $channelData)
             ->assertJsonPath('data.auth', 'public-key:'.hash_hmac('sha256',
-                '123.456:'.$channel.':'.$channelData, 'private-secret'));
+                '123.456:'.$channel.':'.$channelData, 'private-secret'))
+            ->assertDontSee($session);
         $me = collect(Http::recorded())->filter(fn ($pair) => str_ends_with($pair[0]->url(), '/auth/me'));
         $this->assertCount(4, $me);
         foreach ($me as $pair) $this->assertSame(['token' => 'server-token', 'touch_activity' => false], $pair[0]->data());
@@ -529,13 +589,18 @@ final class GatewayTest extends TestCase
                 'role' => 'viewer', 'terms_required' => false]
             : []]));
 
-        $this->withSession(['credential' => 'server-token'])->postJson('/api/v1/auth/logout')->assertOk();
+        $response = $this->withSession(['credential' => 'server-token'])
+            ->postJson('/api/v1/auth/logout')->assertOk()->assertDontSee($session);
+        $response->assertSessionMissing('credential');
         $this->getJson('/api/v1/chat/broadcast-config')->assertUnauthorized();
         $terminate = collect(Http::recorded())->first(fn ($pair) => str_contains($pair[0]->url(), '/terminate_connections'));
         $this->assertNotNull($terminate);
         $url = $terminate[0]->url();
         $path = "/apps/srd-chat-local/users/{$session}/terminate_connections";
         $this->assertSame($path, parse_url($url, PHP_URL_PATH));
+        $opaque = hash_hmac('sha256', 'srd-reverb-session:'.$session, 'private-secret');
+        $paths = collect(Http::recorded())->map(fn ($pair) => parse_url($pair[0]->url(), PHP_URL_PATH));
+        $this->assertContains("/apps/srd-chat-local/users/{$opaque}/terminate_connections", $paths);
         $this->assertSame('{}', $terminate[0]->body());
         parse_str(parse_url($url, PHP_URL_QUERY), $query);
         $signature = $query['auth_signature'];
@@ -558,19 +623,23 @@ final class GatewayTest extends TestCase
             str_ends_with(parse_url($request->url(), PHP_URL_PATH), '/auth/me')
                 ? ['user_id' => '22222222-2222-4222-8222-222222222222',
                     'organization_id' => '11111111-1111-4111-8111-111111111111',
-                    'session_id' => $old, 'role' => 'viewer', 'terms_required' => false]
+                    'session_id' => $old, 'role' => 'viewer', 'terms_required' => true]
                 : (str_ends_with(parse_url($request->url(), PHP_URL_PATH), '/auth/switchOrganization')
                     ? ['token' => $newToken] : [])]));
 
-        $this->withSession(['credential' => 'old-token'])->postJson('/api/v1/auth/switchOrganization', [
+        $this->withSession(['credential' => 'old-token']);
+        $oldBrowserSessionId = session()->getId();
+        $response = $this->postJson('/api/v1/auth/switchOrganization', [
             'organization_code' => 'segunda', 'terms_version_id' => '33333333-3333-4333-8333-333333333333',
             'accepted' => true,
-        ])->assertOk()->assertJsonPath('data', [])->assertDontSee($newToken)
-            ->assertSessionHas('credential', $newToken);
+        ])->assertOk()->assertJsonPath('data', [])->assertDontSee($newToken)->assertDontSee($old);
+        $response->assertSessionHas('credential', $newToken);
+        $this->assertNotSame($oldBrowserSessionId, session()->getId());
         $switch = collect(Http::recorded())->first(fn ($pair) => str_ends_with($pair[0]->url(), '/auth/switchOrganization'));
         $this->assertSame('old-token', $switch[0]['token']);
         $paths = collect(Http::recorded())->map(fn ($pair) => parse_url($pair[0]->url(), PHP_URL_PATH));
         $this->assertContains("/apps/srd-chat-local/users/{$old}/terminate_connections", $paths);
+        $this->assertContains('/apps/srd-chat-local/users/'.hash_hmac('sha256', 'srd-reverb-session:'.$old, 'private-secret').'/terminate_connections', $paths);
     }
 
     public function test_revoke_others_closes_only_returned_sockets_without_exposing_session_ids(): void
@@ -593,6 +662,8 @@ final class GatewayTest extends TestCase
         $paths = collect(Http::recorded())->map(fn ($pair) => parse_url($pair[0]->url(), PHP_URL_PATH));
         $this->assertContains("/apps/srd-chat-local/users/{$other}/terminate_connections", $paths);
         $this->assertNotContains("/apps/srd-chat-local/users/{$current}/terminate_connections", $paths);
+        $this->assertContains('/apps/srd-chat-local/users/'.hash_hmac('sha256', 'srd-reverb-session:'.$other, 'private-secret').'/terminate_connections', $paths);
+        $this->assertNotContains('/apps/srd-chat-local/users/'.hash_hmac('sha256', 'srd-reverb-session:'.$current, 'private-secret').'/terminate_connections', $paths);
     }
 
     public function test_platform_account_suspension_closes_returned_sockets_without_exposing_ids(): void
@@ -764,5 +835,84 @@ final class GatewayTest extends TestCase
         $this->internal('POST', 'chat/terminate-session', ['session_id' => $id], [], 'identity')
             ->assertStatus(503);
         Http::assertSent(fn ($request) => str_contains($request->url(), "/users/{$id}/terminate_connections"));
+    }
+
+    private function identityPrincipalFixture(bool $termsRequired = false): array
+    {
+        return [
+            'user_id' => '22222222-2222-4222-8222-222222222222',
+            'session_id' => '44444444-4444-4444-8444-444444444444',
+            'organization_id' => '11111111-1111-4111-8111-111111111111',
+            'role' => 'admin',
+            'membership_id' => '33333333-3333-4333-8333-333333333333',
+            'membership_version' => 7,
+            'person_id' => '55555555-5555-4555-8555-555555555555',
+            'user' => [
+                'name' => 'Miembro de prueba',
+                'email' => 'miembro@example.test',
+                'theme' => 'dark',
+                'presence' => 'online',
+                'language' => 'es',
+                'title' => 'Secretaria',
+                'title_en' => 'Secretary',
+                'bio' => 'Perfil de prueba',
+                'bio_en' => 'Test profile',
+                'internal_flag' => 'private-principal-value',
+            ],
+            'organization' => [
+                'id' => '11111111-1111-4111-8111-111111111111',
+                'code' => 'junta-prueba',
+                'name' => 'Junta de prueba',
+                'accent' => '#1d4ed8',
+                'version' => 4,
+                'active' => true,
+                'created_at' => '2026-11-02T10:00:00Z',
+                'updated_at' => '2026-11-02T10:00:00Z',
+                'terms' => [
+                    'id' => '66666666-6666-4666-8666-666666666666',
+                    'version' => 2,
+                    'body' => 'Términos de prueba en español.',
+                    'body_en' => 'Test terms in English.',
+                    'organization_id' => '11111111-1111-4111-8111-111111111111',
+                    'published_at' => '2026-11-02T10:00:00Z',
+                ],
+            ],
+            'terms_required' => $termsRequired,
+            'internal_flag' => 'private-principal-value',
+        ];
+    }
+
+    private function publicPrincipalFixture(bool $termsRequired = false): array
+    {
+        return [
+            'user_id' => '22222222-2222-4222-8222-222222222222',
+            'person_id' => '55555555-5555-4555-8555-555555555555',
+            'role' => 'admin',
+            'user' => [
+                'name' => 'Miembro de prueba',
+                'email' => 'miembro@example.test',
+                'theme' => 'dark',
+                'presence' => 'online',
+                'language' => 'es',
+                'title' => 'Secretaria',
+                'title_en' => 'Secretary',
+                'bio' => 'Perfil de prueba',
+                'bio_en' => 'Test profile',
+            ],
+            'organization' => [
+                'id' => '11111111-1111-4111-8111-111111111111',
+                'code' => 'junta-prueba',
+                'name' => 'Junta de prueba',
+                'accent' => '#1d4ed8',
+                'version' => 4,
+                'terms' => [
+                    'id' => '66666666-6666-4666-8666-666666666666',
+                    'version' => 2,
+                    'body' => 'Términos de prueba en español.',
+                    'body_en' => 'Test terms in English.',
+                ],
+            ],
+            'terms_required' => $termsRequired,
+        ];
     }
 }

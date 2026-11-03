@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Support\ChatConnectionTerminator;
+use App\Support\PublicPrincipal;
 use Illuminate\Http\Request;
 use Illuminate\Http\Client\Pool;
 use Illuminate\Http\Client\Response;
@@ -81,7 +82,7 @@ final class GatewayController
             $r->session()->put('credential', $result['token']);
             $r->session()->forget('challenge_id');
 
-            return ['data' => $this->principal($r)];
+            return ['data' => PublicPrincipal::from($this->principal($r))];
         }
         if ($action === 'switchOrganization') {
             $r->session()->regenerate();
@@ -101,7 +102,7 @@ final class GatewayController
 
     public function me(Request $r): array
     {
-        return ['data' => $this->principal($r, true)];
+        return ['data' => PublicPrincipal::from($this->principal($r, true))];
     }
 
     public function serviceStatus(Request $r): array
@@ -262,7 +263,9 @@ final class GatewayController
         abort_unless(is_string($key) && $key !== '' && is_string($secret) && $secret !== '', 503);
         $sessionId = $p['session_id'] ?? null;
         abort_unless(is_string($sessionId) && preg_match('/^[0-9a-fA-F-]{36}$/', $sessionId), 403);
-        $channelData = json_encode(['user_id' => $sessionId], JSON_THROW_ON_ERROR);
+        $broadcastUserId = $this->chatConnections->publicUserIdForSession($sessionId);
+        abort_unless(is_string($broadcastUserId), 503);
+        $channelData = json_encode(['user_id' => $broadcastUserId], JSON_THROW_ON_ERROR);
         return ['data' => ['auth' => $key.':'.hash_hmac('sha256',
             $data['socket_id'].':'.$channel.':'.$channelData, $secret), 'channel_data' => $channelData]];
     }

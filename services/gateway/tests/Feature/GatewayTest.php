@@ -577,6 +577,182 @@ final class GatewayTest extends TestCase
         foreach ($me as $pair) $this->assertSame(['token' => 'server-token', 'touch_activity' => false], $pair[0]->data());
     }
 
+
+    public function test_chat_termination_attempts_opaque_user_after_legacy_request_fails(): void
+    {
+        config()->set('srd.chat_broadcast_app_id', 'srd-chat-local');
+        config()->set('srd.chat_broadcast_key', 'public-key');
+        config()->set('srd.chat_broadcast_secret', 'private-secret');
+        $session = '44444444-4444-4444-8444-444444444444';
+        $opaque = hash_hmac('sha256', 'srd-reverb-session:'.$session, 'private-secret');
+        $paths = [];
+
+        Http::fake(function ($request) use (&$paths, $session) {
+            $path = parse_url($request->url(), PHP_URL_PATH);
+            $paths[] = $path;
+
+            return $path === "/apps/srd-chat-local/users/{$session}/terminate_connections"
+                ? Http::response([], 503)
+                : Http::response([], 200);
+        });
+
+        $result = app(\App\Support\ChatConnectionTerminator::class)->terminate($session);
+
+        $this->assertFalse($result);
+        $this->assertSame([
+            "/apps/srd-chat-local/users/{$session}/terminate_connections",
+            "/apps/srd-chat-local/users/{$opaque}/terminate_connections",
+        ], $paths);
+        Http::assertSentCount(2);
+    }
+
+    public function test_chat_termination_accepts_empty_success_responses_for_both_user_id_generations(): void
+    {
+        config()->set('srd.chat_broadcast_app_id', 'srd-chat-local');
+        config()->set('srd.chat_broadcast_key', 'public-key');
+        config()->set('srd.chat_broadcast_secret', 'private-secret');
+        $session = '44444444-4444-4444-8444-444444444444';
+
+        Http::fake(fn ($request) => Http::response([], 200));
+
+        $this->assertTrue(app(\App\Support\ChatConnectionTerminator::class)->terminate($session));
+        Http::assertSentCount(2);
+        Http::assertSent(fn ($request) => str_ends_with(
+            parse_url($request->url(), PHP_URL_PATH),
+            '/terminate_connections'
+        ) && $request->body() === '{}');
+    }
+
+    public function test_chat_termination_attempts_opaque_user_after_legacy_connection_exception(): void
+    {
+        config()->set('srd.chat_broadcast_app_id', 'srd-chat-local');
+        config()->set('srd.chat_broadcast_key', 'public-key');
+        config()->set('srd.chat_broadcast_secret', 'private-secret');
+        $session = '44444444-4444-4444-8444-444444444444';
+        $opaque = hash_hmac('sha256', 'srd-reverb-session:'.$session, 'private-secret');
+        $paths = [];
+
+        Http::fake(function ($request) use (&$paths, $session) {
+            $path = parse_url($request->url(), PHP_URL_PATH);
+            $paths[] = $path;
+            if ($path === "/apps/srd-chat-local/users/{$session}/terminate_connections") {
+                return Http::failedConnection('Synthetic Reverb connection failure')($request);
+            }
+
+            return Http::response([], 200);
+        });
+
+        $this->assertFalse(app(\App\Support\ChatConnectionTerminator::class)->terminate($session));
+        $this->assertSame([
+            "/apps/srd-chat-local/users/{$session}/terminate_connections",
+            "/apps/srd-chat-local/users/{$opaque}/terminate_connections",
+        ], $paths);
+    }
+
+    public function test_opaque_termination_failure_is_reported_without_identifiers_or_credentials(): void
+    {
+        config()->set('srd.chat_broadcast_app_id', 'srd-chat-local');
+        config()->set('srd.chat_broadcast_key', 'public-key');
+        config()->set('srd.chat_broadcast_secret', 'private-secret');
+        $session = '44444444-4444-4444-8444-444444444444';
+        $opaque = hash_hmac('sha256', 'srd-reverb-session:'.$session, 'private-secret');
+
+        Http::fake(fn ($request) => parse_url($request->url(), PHP_URL_PATH)
+            === "/apps/srd-chat-local/users/{$opaque}/terminate_connections"
+                ? Http::response([], 503)
+                : Http::response([], 200));
+        \Illuminate\Support\Facades\Log::shouldReceive('warning')
+            ->once()
+            ->with('Reverb did not confirm a Chat connection termination.', \Mockery::on(
+                function (array $context) use ($session): bool {
+                    $serialized = json_encode($context);
+
+                    return ($context['target'] ?? null) === 'opaque'
+                        && ($context['status'] ?? null) === 503
+                        && ! str_contains($serialized, $session)
+                        && ! str_contains($serialized, 'private-secret')
+                        && ! str_contains($serialized, 'auth_signature');
+                }
+            ));
+
+        $this->assertFalse(app(\App\Support\ChatConnectionTerminator::class)->terminate($session));
+        Http::assertSentCount(2);
+    }
+
+    public function test_chat_termination_signs_legacy_and_opaque_requests_with_their_exact_paths(): void
+    {
+        config()->set('srd.chat_broadcast_app_id', 'srd-chat-local');
+        config()->set('srd.chat_broadcast_key', 'public-key');
+        config()->set('srd.chat_broadcast_secret', 'private-secret');
+        $session = '44444444-4444-4444-8444-444444444444';
+        $opaque = hash_hmac('sha256', 'srd-reverb-session:'.$session, 'private-secret');
+
+        Http::fake(fn ($request) => Http::response([], 200));
+
+        $this->assertTrue(app(\App\Support\ChatConnectionTerminator::class)->terminate($session));
+        $requests = collect(Http::recorded())->values();
+        $this->assertCount(2, $requests);
+
+        foreach ([$session, $opaque] as $index => $userId) {
+            $request = $requests[$index][0];
+            $path = "/apps/srd-chat-local/users/{$userId}/terminate_connections";
+            $this->assertSame($path, parse_url($request->url(), PHP_URL_PATH));
+            $this->assertSame('{}', $request->body());
+            parse_str(parse_url($request->url(), PHP_URL_QUERY), $query);
+            $signature = $query['auth_signature'];
+            unset($query['auth_signature']);
+            ksort($query);
+            $this->assertSame('public-key', $query['auth_key']);
+            $this->assertSame(md5('{}'), $query['body_md5']);
+            $this->assertSame(hash_hmac(
+                'sha256',
+                "POST\n{$path}\n".http_build_query($query, '', '&', PHP_QUERY_RFC3986),
+                'private-secret'
+            ), $signature);
+        }
+    }
+
+    public function test_logout_remains_revoked_when_reverb_termination_fails(): void
+    {
+        config()->set('srd.chat_broadcast_app_id', 'srd-chat-local');
+        config()->set('srd.chat_broadcast_key', 'public-key');
+        config()->set('srd.chat_broadcast_secret', 'private-secret');
+        $session = '44444444-4444-4444-8444-444444444444';
+        $paths = [];
+
+        Http::fake(function ($request) use (&$paths, $session) {
+            $path = parse_url($request->url(), PHP_URL_PATH);
+            if (str_ends_with($path, '/auth/me')) {
+                return Http::response(['data' => [
+                    'user_id' => '22222222-2222-4222-8222-222222222222',
+                    'organization_id' => '11111111-1111-4111-8111-111111111111',
+                    'session_id' => $session,
+                    'role' => 'viewer',
+                    'terms_required' => false,
+                ]]);
+            }
+            if (str_ends_with($path, '/auth/logout')) {
+                return Http::response(['data' => []]);
+            }
+            if (str_contains($path, '/terminate_connections')) {
+                $paths[] = $path;
+
+                return Http::response([], 503);
+            }
+
+            return Http::response([], 404);
+        });
+
+        $response = $this->withSession(['credential' => 'server-token'])
+            ->postJson('/api/v1/auth/logout')->assertOk()->assertJsonPath('data', []);
+        $response->assertSessionMissing('credential');
+        $opaque = hash_hmac('sha256', 'srd-reverb-session:'.$session, 'private-secret');
+        $this->assertSame([
+            "/apps/srd-chat-local/users/{$session}/terminate_connections",
+            "/apps/srd-chat-local/users/{$opaque}/terminate_connections",
+        ], $paths);
+    }
+
     public function test_logout_requests_server_side_chat_socket_termination_after_identity_revocation(): void
     {
         config()->set('srd.chat_broadcast_app_id', 'srd-chat-local');

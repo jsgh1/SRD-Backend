@@ -20,6 +20,10 @@ final class ChatConnectionTerminator
         return hash_hmac('sha256', self::SESSION_USER_DOMAIN.$sessionId, $secret);
     }
 
+    /**
+     * Returns true only when Reverb accepts both legacy and opaque-user termination commands.
+     * A successful response confirms command handling, not that a connection was present.
+     */
     public function terminate(string $sessionId): bool
     {
         $appId = config('srd.chat_broadcast_app_id');
@@ -31,47 +35,58 @@ final class ChatConnectionTerminator
             return false;
         }
 
-        $path = "/apps/{$appId}/users/{$sessionId}/terminate_connections";
+        $broadcastUserId = $this->publicUserIdForSession($sessionId);
+        if (! is_string($broadcastUserId)) {
+            return false;
+        }
+
+        // Keep these attempts independent: a failure in one namespace must not prevent
+        // trying the other. Identity revocation may already be committed by this point.
+        $legacyConfirmed = $this->terminateUserId($appId, $sessionId, $key, $secret, 'legacy');
+        $opaqueConfirmed = $this->terminateUserId($appId, $broadcastUserId, $key, $secret, 'opaque');
+
+        return $legacyConfirmed && $opaqueConfirmed;
+    }
+
+    private function terminateUserId(
+        string $appId,
+        string $userId,
+        string $key,
+        string $secret,
+        string $target
+    ): bool {
+        $path = "/apps/{$appId}/users/{$userId}/terminate_connections";
         $body = '{}';
-        $query = ['auth_key' => $key, 'auth_timestamp' => time(), 'auth_version' => '1.0',
-            'body_md5' => md5($body)];
+        $query = [
+            'auth_key' => $key,
+            'auth_timestamp' => time(),
+            'auth_version' => '1.0',
+            'body_md5' => md5($body),
+        ];
         ksort($query);
         $canonicalQuery = http_build_query($query, '', '&', PHP_QUERY_RFC3986);
         $query['auth_signature'] = hash_hmac('sha256', "POST\n{$path}\n{$canonicalQuery}", $secret);
-        $url = rtrim(config('srd.chat_reverb_url'), '/').$path.'?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+        $url = rtrim(config('srd.chat_reverb_url'), '/').$path.'?'
+            .http_build_query($query, '', '&', PHP_QUERY_RFC3986);
 
         try {
             $response = Http::connectTimeout(1)->timeout(2)->withBody($body, 'application/json')->post($url);
-            if (! $response->successful()) {
-                Log::warning('Reverb no confirmó el cierre de una sesión de Chat.', ['status' => $response->status()]);
-            }
-            if (! $response->successful()) {
-                return false;
-            }
-
-            // New channel authorizations use an opaque user ID. Also close the raw ID during
-            // the transition so sessions connected before this change are not left active.
-            $broadcastUserId = $this->publicUserIdForSession($sessionId);
-            if (! is_string($broadcastUserId)) return false;
-            $mappedPath = "/apps/{$appId}/users/{$broadcastUserId}/terminate_connections";
-            $mappedQuery = ['auth_key' => $key, 'auth_timestamp' => time(), 'auth_version' => '1.0',
-                'body_md5' => md5($body)];
-            ksort($mappedQuery);
-            $mappedCanonicalQuery = http_build_query($mappedQuery, '', '&', PHP_QUERY_RFC3986);
-            $mappedQuery['auth_signature'] = hash_hmac(
-                'sha256', "POST\n{$mappedPath}\n{$mappedCanonicalQuery}", $secret);
-            $mappedUrl = rtrim(config('srd.chat_reverb_url'), '/').$mappedPath.'?'
-                .http_build_query($mappedQuery, '', '&', PHP_QUERY_RFC3986);
-            $mappedResponse = Http::connectTimeout(1)->timeout(2)->withBody($body, 'application/json')->post($mappedUrl);
-            if (! $mappedResponse->successful()) {
-                Log::warning('Reverb did not confirm a Chat connection termination.', ['status' => $mappedResponse->status()]);
-            }
-
-            return $mappedResponse->successful();
         } catch (\Throwable $e) {
-            // Revocation in Identity has already committed. The client and REST checks remain active.
-            Log::warning('No se pudo cerrar una sesión de Chat en Reverb.', ['exception' => $e::class]);
+            Log::warning('No se pudo cerrar una sesión de Chat en Reverb.', [
+                'target' => $target,
+                'exception' => $e::class,
+            ]);
+
             return false;
         }
+
+        if (! $response->successful()) {
+            Log::warning('Reverb did not confirm a Chat connection termination.', [
+                'target' => $target,
+                'status' => $response->status(),
+            ]);
+        }
+
+        return $response->successful();
     }
 }

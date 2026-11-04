@@ -4959,6 +4959,171 @@
           }
         }
       }
+    },
+    "/persons/{id}/detach-for-erasure": {
+      "post": {
+        "summary": "Desvincular internamente los vinculos de una persona durante su supresion",
+        "description": "Contrato interno, no accesible para navegadores. Requiere X-SRD-Context firmado por el servicio records; el controlador valida issuer=records y organization_id/user_id UUID del principal firmado. El id de ruta es la persona objetivo. En esa junta, pone person_id a null en membresias enlazadas e incrementa su version, revoca invitaciones asociadas, limpia secret_encrypted y reemplaza su email por un marcador sintetico; secret_hash no se modifica y permanece en el registro. Revoca sesiones activas y consume desafios de autenticacion de las cuentas enlazadas en esa junta, y encola el cierre de sus sockets de Chat. No elimina la cuenta de usuario, membresias de otras juntas, solicitudes de Records ni fotos de Files. La respuesta detached=true solo confirma que la transaccion de desvinculacion se ejecuto; tambien se devuelve si el UUID valido no tenia vinculos en esa junta. Repetir la llamada sobre el mismo estado ya desvinculado no vuelve a incrementar la version de esa membresia (cubierto por la prueba PersonLinkErasureTest); no se usa Idempotency-Key.",
+        "operationId": "internal_post_person_detach_for_erasure",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la persona cuyos vinculos se desvinculan en la junta del principal.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-Correlation-ID",
+            "in": "header",
+            "required": false,
+            "description": "UUID opcional para seguimiento. Si falta o no tiene formato UUID, el servicio genera uno.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "La transaccion de Identity completo la desvinculacion solicitada.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "detached"
+                      ],
+                      "properties": {
+                        "detached": {
+                          "type": "boolean",
+                          "const": true
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "El contexto interno firmado esta ausente, vencido, repetido o no coincide con audiencia, metodo, ruta o hash del cuerpo.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El issuer no es records o el contexto firmado no contiene organization_id y user_id validos.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El id no cumple el formato UUID requerido por la ruta.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error inesperado durante la transaccion de Identity.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

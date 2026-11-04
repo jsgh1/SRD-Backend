@@ -1,38 +1,10 @@
 {
-    "version":  1,
-    "semantics":  {
-                      "public":  "Operation is routed through the externally reachable Gateway API boundary; this label does not assert unauthenticated access. Per-operation authentication and authorization remain to be verified in contract work.",
-                      "internal":  "Microservice route is explicitly protected by the internal middleware, which validates a signed short-lived service context. Document as an internal contract; it is not excluded from contract work.",
-                      "technical":  "Infrastructure or operational endpoint verified from route and deployment configuration. Use only with route-specific evidence.",
-                      "excluded":  "Deliberately outside contract scope, with a specific rationale and evidence."
-                  },
-    "services":  {
-                     "gateway":  {
-                                     "rationale":  "services/gateway/routes/web.php: Route::prefix(api/v1); externally routable Gateway boundary. Public means boundary scope only, not anonymous access.",
-                                     "routes":  [
-                                                    {
-                                                        "operation":  "POST /privacy-requests/{id}/execute-erasure",
-                                                        "category":  "public"
-                                                    }
-                                                ]
-                                 },
-                     "identity":  {
-                                      "rationale":  "services/identity/routes/api.php: routes are in middleware(internal); shared packages/php/src/InternalAuth.php verifies signed service context.",
-                                      "routes":  [
-                                                     {
-                                                         "operation":  "POST /persons/{id}/detach-for-erasure",
-                                                         "category":  "internal"
-                                                     }
-                                                 ]
-                                  },
-                     "records":  {
-                                     "rationale":  "services/records/routes/api.php: routes are in middleware(internal); shared packages/php/src/InternalAuth.php verifies signed service context.",
-                                     "routes":  [
-                                                    {
-                                                        "operation":  "POST /privacy-requests/{id}/execute-erasure",
-                                                        "category":  "internal"
-                                                    }
-                                                ]
-                                 }
-                 }
+  "version": 1,
+  "semantics": {
+    "public": "Operation is routed through the externally reachable Gateway API boundary. This label does not imply anonymous access; consult each operation’s OpenAPI security declaration and authorization requirements.",
+    "internal": "Microservice route is explicitly protected by the internal middleware, which validates a signed short-lived service context. Document as an internal contract; it is not excluded from contract work.",
+    "technical": "Infrastructure or operational endpoint verified from route and deployment configuration. Use only with route-specific evidence.",
+    "excluded": "Deliberately outside contract scope, with a specific rationale and evidence."
+  },
+  "services": {}
 }

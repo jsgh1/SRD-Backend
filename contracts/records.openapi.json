@@ -6326,6 +6326,290 @@
           }
         }
       }
+    },
+    "/privacy-requests/{id}/execute-erasure": {
+      "post": {
+        "summary": "Ejecutar internamente una solicitud de supresion aprobada",
+        "description": "Contrato interno dirigido exclusivamente desde Gateway. Requiere X-SRD-Context firmado; Records acepta solo issuer=gateway y valida el permiso organization.manage desde el principal firmado de la junta activa (superadmin o admin). Exige una solicitud erasure aprobada o ya en proceso, que responsible_id sea el usuario actual, version coincidente y confirmed aceptado. La operacion no usa organizacion ni actor enviados como campos del cuerpo. En la transaccion de Records, consulta a Identity para desvincular, elimina la persona, redacta resumen/decision de las solicitudes relacionadas, borra todas las filas person_export_jobs de la junta, crea una tarea duradera photo_deletions y registra eventos Outbox. No borra la fila de privacy_requests ni su person_id; conserva identificadores de actor, historial de estados/fechas y request/person/organization IDs, aunque limpia decision del historial. Identity confirma en su propia transaccion antes del commit de Records: no hay atomicidad distribuida y un fallo posterior puede dejar la desvinculacion ya aplicada. Despues del commit, Records llama sincronicamente a Files; si la limpieza falla, PhotoDeletionPublisher conserva/reprograma la tarea (1, 5, 15 y luego cada 60 minutos) y el estado sigue erasure_in_progress. erased solo se escribe despues de la respuesta accepted de Files, cuyo purgePerson elimina registros de fotos y procesa los objetos de basura; no es una promesa de borrar historial, actor IDs, person_id retenidos ni todo identificador entre servicios. La misma solicitud requiere la version vigente; una repeticion con version anterior devuelve 409. No hay Idempotency-Key ni reintento HTTP automatico.",
+        "operationId": "internal_post_privacy_request_execute_erasure",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la solicitud de supresion dentro de la junta del principal.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-Correlation-ID",
+            "in": "header",
+            "required": false,
+            "description": "UUID opcional para seguimiento. Si falta o no tiene formato UUID, el servicio genera uno.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "version",
+                  "confirmed"
+                ],
+                "properties": {
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Version actual de la solicitud aprobada o en proceso."
+                  },
+                  "confirmed": {
+                    "oneOf": [
+                      {
+                        "type": "boolean",
+                        "const": true
+                      },
+                      {
+                        "type": "integer",
+                        "const": 1
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "1",
+                          "true",
+                          "yes",
+                          "on"
+                        ]
+                      }
+                    ],
+                    "description": "Debe tener uno de los valores que acepta la regla Laravel accepted."
+                  }
+                },
+                "description": "No se rechazan campos adicionales, pero no conceden autoridad ni cambian la junta activa."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Regresa id, status y version. El estado puede ser erasure_in_progress o erased segun la limpieza de Files.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "status",
+                        "version"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Identificador de la solicitud indicada en la ruta."
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "erasure_in_progress",
+                            "erased"
+                          ]
+                        },
+                        "version": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "description": "Version vigente despues de los cambios completados."
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "El contexto interno firmado falta, es invalido, vencio, se repitio o no coincide con audiencia, metodo, ruta o hash del cuerpo.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El issuer no es gateway, falta organization.manage o el principal no es responsable de la solicitud.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "UUID invalido o solicitud no encontrada dentro de la junta del principal.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Version desactualizada, otra solicitud de la persona ya esta en proceso o la ficha desaparecio.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Cuerpo invalido o tipo/estado incompatible con la ejecucion.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Fallo inesperado durante la transaccion de Records.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Identity no pudo completar la desvinculacion requerida; Files que no completa la limpieza se refleja como erasure_in_progress con reintento durable.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

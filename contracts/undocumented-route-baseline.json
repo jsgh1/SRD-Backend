@@ -1,37 +1,17 @@
 {
-    "version":  1,
-    "description":  "Explicit inventory of pre-existing undocumented Laravel route templates. Entries remain open contract debt; this baseline only blocks unreviewed route drift.",
-    "services":  {
-                     "gateway":  [
-                                     "POST /privacy-requests/{id}/execute-erasure"
-                                 ],
-                     "identity":  [
-                                      "POST /persons/{id}/detach-for-erasure"
-                                  ],
-                     "configuration":  [
-
-                                       ],
-                     "records":  [
-                                     "POST /privacy-requests/{id}/execute-erasure"
-                                 ],
-                     "audit":  [
-
-                               ],
-                     "files":  [
-                               ],
-                     "calendar":  [
-
-                                  ],
-                     "notifications":  [
-
-                                       ],
-                     "treasury":  [
-
-                                  ],
-                     "inventory":  [
-
-                                   ],
-                     "chat":  [
-                              ]
-                 }
+  "version": 1,
+  "description": "Inventory of accepted undocumented Laravel route templates. Empty lists mean no accepted route debt; the CI checker blocks unreviewed route drift.",
+  "services": {
+    "gateway": [],
+    "identity": [],
+    "configuration": [],
+    "records": [],
+    "audit": [],
+    "files": [],
+    "calendar": [],
+    "notifications": [],
+    "treasury": [],
+    "inventory": [],
+    "chat": []
+  }
 }

@@ -24480,6 +24480,339 @@
           }
         }
       }
+    },
+    "/privacy-requests/{id}/execute-erasure": {
+      "post": {
+        "summary": "Ejecutar la supresion aprobada de una persona de la junta activa",
+        "description": "Operación de la frontera externa Gateway; no es anónima. Requiere la cookie de sesión srd_session, X-CSRF-TOKEN de GET /csrf, una sesión vigente y el permiso organization.manage (superadmin o admin). Gateway obtiene de Identity el principal y el contexto de junta activa; los campos organization_id, user_id y role del cuerpo no se usan para autorizar. Envía a Records un contexto interno firmado con emisor gateway. Records exige que la solicitud sea de tipo erasure, esté approved_pending_erasure o erasure_in_progress, que el responsable sea el principal actual, que version coincida y que confirmed sea aceptado. En la primera ejecución se desvinculan relaciones de Identity, se elimina la fila de persona en Records, se redactan resumen/decision de las solicitudes relacionadas, se registran eventos y se inicia la limpieza de fotos con Files. La implementación conserva identificadores de solicitud, persona, junta, actores, estados e historial; borra todas las filas person_export_jobs de la junta, no solo las de la persona objeto de la solicitud. No existe transaccion distribuida entre servicios. Records confirma erasure_in_progress mientras haya limpieza de Files pendiente y cambia a erased cuando Files completa el purgePerson. La llamada Records->Files puede esperar hasta 75 s, mientras Gateway espera como maximo 15 s por Records; un 503 o timeout puede dejar el resultado incierto. No hay reintento HTTP automatico ni Idempotency-Key. Tras un timeout o 409, consulta estado/version antes de decidir si reintentar; la misma version anterior no se vuelve a aceptar.",
+        "operationId": "post_privacy_request_execute_erasure",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la solicitud de supresion dentro de la junta del principal.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-CSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "description": "Token CSRF vigente obtenido de GET /csrf.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Correlation-ID",
+            "in": "header",
+            "required": false,
+            "description": "UUID opcional para seguimiento. Si falta o no tiene formato UUID, el servicio genera uno.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "version",
+                  "confirmed"
+                ],
+                "properties": {
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Version actual de la solicitud aprobada o en proceso."
+                  },
+                  "confirmed": {
+                    "oneOf": [
+                      {
+                        "type": "boolean",
+                        "const": true
+                      },
+                      {
+                        "type": "integer",
+                        "const": 1
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "1",
+                          "true",
+                          "yes",
+                          "on"
+                        ]
+                      }
+                    ],
+                    "description": "Debe tener uno de los valores que acepta la regla Laravel accepted."
+                  }
+                },
+                "description": "No se rechazan campos adicionales, pero no conceden autoridad ni cambian la junta activa."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "La solicitud se proceso. status puede ser erasure_in_progress mientras Files termina o se reintenta la limpieza; puede ser erased cuando Files confirma que purgePerson completo.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "status",
+                        "version"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Identificador de la solicitud indicada en la ruta."
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "erasure_in_progress",
+                            "erased"
+                          ]
+                        },
+                        "version": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "description": "Version vigente despues de los cambios completados."
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No hay una sesion de navegador valida.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Falta organization.manage, el solicitante no es la persona responsable o la sesion requiere completar terminos.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El UUID no corresponde a una solicitud dentro de la junta activa.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "La version esperada esta desactualizada, ya hay otra supresion en proceso para la misma persona o la ficha ya no existe.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Falta el token CSRF o la sesion del formulario vencio.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "El cuerpo es invalido o el tipo/estado de la solicitud no permite ejecutar la supresion.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Se excedio el limite global de Gateway: 600 solicitudes por minuto por sesion autenticada y 6000 por minuto por IP.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error inesperado en Gateway o en el procesamiento de Records.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Identity, Records u otro servicio requerido no respondio a tiempo o no esta disponible; consulta el estado porque la operacion pudo haber avanzado.",
+            "headers": {
+              "X-Correlation-ID": {
+                "description": "UUID de correlacion presente en todas las respuestas, incluidas las de error.",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

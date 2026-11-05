@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "semantics": {
+    "public": "Operation is routed through the externally reachable Gateway API boundary. This label does not imply anonymous access; consult each operation’s OpenAPI security declaration and authorization requirements.",
+    "internal": "Microservice route is explicitly protected by the internal middleware, which validates a signed short-lived service context. Document as an internal contract; it is not excluded from contract work.",
+    "technical": "Infrastructure or operational endpoint verified from route and deployment configuration. Use only with route-specific evidence.",
+    "excluded": "Deliberately outside contract scope, with a specific rationale and evidence."
+  },
+  "services": {}
+}

@@ -1,0 +1,5429 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SRD chat API interna",
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "http://chat:8000/internal/v1"
+    }
+  ],
+  "paths": {
+    "/conversations": {
+      "get": {
+        "summary": "Conversaciones directas propias de la junta activa; páginas de 25",
+        "operationId": "get_conversations",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {},
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error normalizado 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error normalizado 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error normalizado 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error normalizado 409",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Error normalizado 419",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error normalizado 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error normalizado 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error normalizado 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ]
+      },
+      "post": {
+        "summary": "Abrir o reutilizar conversación con integrante activo de la misma junta",
+        "operationId": "post_conversations",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {},
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error normalizado 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error normalizado 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error normalizado 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error normalizado 409",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Error normalizado 419",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error normalizado 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error normalizado 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error normalizado 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatStart"
+              }
+            }
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/conversations/{id}": {
+      "get": {
+        "summary": "Consultar una conversación propia para abrirla desde un aviso de Chat",
+        "operationId": "get_conversations__id_",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {},
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error normalizado 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error normalizado 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error normalizado 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error normalizado 409",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Error normalizado 419",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error normalizado 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error normalizado 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error normalizado 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/conversations/{id}/activity": {
+      "post": {
+        "summary": "Publicar actividad temporal de un participante de la conversación",
+        "operationId": "post_conversations_id_activity",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Actividad temporal registrada o eliminada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "kind"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "typing",
+                            "recording",
+                            "idle"
+                          ]
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error normalizado 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error normalizado 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error normalizado 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error normalizado 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error normalizado 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatActivity"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{id}/messages": {
+      "get": {
+        "summary": "Últimos 25 mensajes; before consulta anteriores y after consulta posteriores en orden ascendente. receipt_ids consulta marcas de hasta 25 mensajes propios.",
+        "operationId": "get_conversations__id__messages",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {},
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error normalizado 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error normalizado 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error normalizado 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error normalizado 409",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Error normalizado 419",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error normalizado 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error normalizado 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error normalizado 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Cursor exclusivo hacia mensajes anteriores; no combinar con after."
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "Cursor exclusivo hacia mensajes nuevos; devuelve hasta 25 en orden ascendente y next_after para continuar. No combinar con before."
+          },
+          {
+            "name": "receipt_ids",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "maxItems": 25,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            "description": "IDs de mensajes enviados por el solicitante para consultar entregado/leído; la respuesta incluye receipts."
+          }
+        ]
+      },
+      "post": {
+        "summary": "Guardar texto de hasta 10000 caracteres; reintento idempotente por client_id del remitente",
+        "operationId": "post_conversations__id__messages",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {},
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error normalizado 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error normalizado 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error normalizado 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error normalizado 409",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Error normalizado 419",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error normalizado 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error normalizado 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error normalizado 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatMessage"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Clear the caller’s conversation history",
+        "description": "Advances only the authenticated participant’s cleared sequence cutoff. Messages are retained, and the other participant’s history is unchanged.",
+        "operationId": "delete_conversations__id__messages",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conversation history cleared for the caller",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {},
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error normalizado 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error normalizado 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error normalizado 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error normalizado 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{id}/pinned": {
+      "get": {
+        "summary": "List up to 25 pinned messages visible to the conversation participant.",
+        "operationId": "get_conversations__id__pinned",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pinned messages visible to the authenticated participant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "items"
+                      ],
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "maxItems": 25,
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "id",
+                              "sequence",
+                              "sender_id",
+                              "body",
+                              "reply_to_id",
+                              "system_kind",
+                              "call_duration_seconds",
+                              "pinned",
+                              "attachment",
+                              "created_at",
+                              "delivered_at",
+                              "read_at"
+                            ],
+                            "properties": {
+                              "id": { "type": "string", "format": "uuid" },
+                              "sequence": { "type": "integer", "minimum": 1 },
+                              "sender_id": { "type": "string", "format": "uuid" },
+                              "body": { "type": "string" },
+                              "reply_to_id": { "type": ["string", "null"], "format": "uuid" },
+                              "system_kind": { "type": ["string", "null"] },
+                              "call_duration_seconds": { "type": ["integer", "null"], "minimum": 0 },
+                              "pinned": { "type": "boolean", "const": true },
+                              "attachment": {
+                                "type": ["object", "null"],
+                                "required": ["id", "name", "mime", "bytes"],
+                                "properties": {
+                                  "id": { "type": "string", "format": "uuid" },
+                                  "name": { "type": "string" },
+                                  "mime": { "type": "string" },
+                                  "bytes": { "type": "integer", "minimum": 0 }
+                                }
+                              },
+                              "created_at": { "type": "string", "format": "date-time" },
+                              "delivered_at": { "type": ["string", "null"], "format": "date-time" },
+                              "read_at": { "type": ["string", "null"], "format": "date-time" }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": ["correlation_id"],
+                      "properties": {
+                        "correlation_id": { "type": "string", "format": "uuid" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication context is missing or invalid.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          },
+          "404": {
+            "description": "Conversation not found for the authenticated participant.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          },
+          "429": {
+            "description": "Rate limit exceeded.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          },
+          "503": {
+            "description": "Chat service is unavailable.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          }
+        }
+      }
+    },
+    "/conversations/{id}/receipts": {
+      "post": {
+        "summary": "Confirmar recepción o lectura de mensajes concretos por el destinatario; lectura exige visibilidad real en el cliente",
+        "operationId": "post_conversations__id__receipts",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {},
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error normalizado 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error normalizado 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error normalizado 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error normalizado 409",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Error normalizado 419",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error normalizado 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error normalizado 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error normalizado 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatReceipt"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/scheduler-status": {
+      "get": {
+        "summary": "Marcadores locales recientes del planificador; solo emisor gateway firmado",
+        "operationId": "get_system_schedulers",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "available": {
+                          "type": "boolean"
+                        },
+                        "cycle_recent": {
+                          "type": "boolean"
+                        },
+                        "outbox_recent": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "available",
+                        "cycle_recent",
+                        "outbox_recent"
+                      ]
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error normalizado 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error normalizado 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error normalizado 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error normalizado 409",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Error normalizado 419",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error normalizado 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error normalizado 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error normalizado 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/outbox-status": {
+      "get": {
+        "summary": "Estado de entrega y hasta 20 eventos agotados de la junta; requiere permiso de auditoría",
+        "operationId": "get_audit_delivery__service_",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {},
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error normalizado 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error normalizado 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error normalizado 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error normalizado 409",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Error normalizado 419",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error normalizado 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error normalizado 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error normalizado 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/outbox-status/{id}/retry": {
+      "post": {
+        "summary": "Programar un nuevo intento de un evento de auditoría agotado de la junta; solo SA/AD",
+        "operationId": "post_audit_delivery__service___id__retry",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {},
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error normalizado 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error normalizado 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error normalizado 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Error normalizado 409",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "419": {
+            "description": "Error normalizado 419",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error normalizado 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error normalizado 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error normalizado 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/conversations/{id}/search": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "get_conversations__id__search",
+        "summary": "Buscar hasta 50 mensajes visibles en una conversación",
+        "description": "Ruta interna protegida por X-SRD-Context firmado, aislamiento de junta y participantes. Busca cuerpo y nombre de adjunto, escapa los comodines SQL y excluye mensajes ocultos o eliminados; ordena por sequence descendente.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la conversación perteneciente a la junta y al participante autenticado",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Coincidencia literal sobre cuerpo o nombre de adjunto; %, _ y ! se escapan como caracteres literales. Máximo 50 resultados, secuencia descendente.",
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 120
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado conforme a la implementación del servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatSearchResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión o contexto interno inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso chat.read insuficiente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversación o recurso no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Parámetros de búsqueda inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Límite de solicitudes excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Servicio temporalmente no disponible",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/voice-calls": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "get_voice_calls",
+        "summary": "Listar hasta 10 llamadas entrantes vigentes",
+        "description": "Ruta interna protegida por X-SRD-Context. Lista solo llamadas ringing dirigidas al usuario del contexto firmado dentro de su junta, excluyendo llamadas caducadas y ordenando por fecha descendente. Al consultar, procesa llamadas vencidas en las conversaciones encontradas: actualiza su estado, limpia señales y registra la llamada perdida o finalizada; las llamadas perdidas generan un aviso.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado conforme a la implementación del servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceCallListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión o contexto interno inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso chat.read insuficiente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Límite de solicitudes excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Servicio temporalmente no disponible",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{conversationId}/calls/{callId}": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "get_conversation_call",
+        "summary": "Consultar el estado de una llamada",
+        "description": "Ruta interna protegida por contexto firmado. Verifica que el usuario y la junta correspondan a un participante de la conversación. Al consultar, el servicio vence llamadas caducadas de esa conversación (actualiza el estado, elimina señales y registra el evento de llamada); si la llamada sigue accepted, renueva su vencimiento por cinco minutos.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la conversación",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "callId",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la llamada",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estado actual de la llamada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceCallDetailResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión o contexto interno inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso chat.read o acceso del participante insuficiente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversación o llamada no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Servicio temporalmente no disponible",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{conversationId}/calls/{callId}/signals": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "get_conversation_call_signals",
+        "summary": "Leer señales WebRTC pendientes de una llamada",
+        "description": "Ruta interna protegida por contexto firmado. Verifica que el usuario y la junta correspondan a un participante de la conversación. Devuelve señales emitidas por el otro participante, con sequence mayor que after, en orden ascendente y hasta 100 elementos. Solo está disponible mientras la llamada esté ringing o accepted; no modifica la llamada.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la conversación",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "callId",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la llamada",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "description": "Última secuencia ya recibida; el valor predeterminado es 0.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Señales nuevas de la otra parte, hasta 100 elementos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceCallSignalsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión o contexto interno inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso chat.read o acceso del participante insuficiente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversación o llamada no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "La llamada ya no admite intercambio de señales",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Parámetro after inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Servicio temporalmente no disponible",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{id}/messages/{messageId}": {
+      "delete": {
+        "summary": "Hide or delete one message according to its sender",
+        "description": "A sender’s non-system message is tombstoned for both participants; a received message or system message is hidden only for the caller. The message row is retained.",
+        "operationId": "delete_conversations__id__messages__messageId",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message hidden for the caller or tombstoned for both participants",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {},
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      },
+                      "required": [
+                        "correlation_id"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error normalizado 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error normalizado 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error normalizado 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error normalizado 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{id}/messages/{messageId}/pin": {
+      "post": {
+        "summary": "Toggle the current participant’s pin state for a visible message",
+        "description": "Requires a valid signed Gateway context and chat.read access. The caller must participate in the conversation and the message must be visible to them. Each participant has a private pin state. Repeating the request toggles that state; this operation is not idempotent.",
+        "operationId": "post_conversations__id__messages__messageId__pin",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pin state for the authenticated participant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "pinned"
+                      ],
+                      "properties": {
+                        "pinned": {
+                          "type": "boolean",
+                          "description": "True when pinned; false when the request removed the caller’s pin."
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Normalized HTTP 401 error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Normalized HTTP 403 error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Normalized HTTP 404 error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Normalized HTTP 429 error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Normalized HTTP 500 error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Normalized HTTP 503 error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{id}/messages/{messageId}/attachment": {
+      "get": {
+        "summary": "Read an attachment from a visible conversation message",
+        "operationId": "get_conversations__id__messages__messageId__attachment",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Attachment metadata and base64 content in the JSON envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "name",
+                        "mime",
+                        "bytes",
+                        "content"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "name": {
+                          "type": "string",
+                          "maxLength": 255
+                        },
+                        "mime": {
+                          "type": "string"
+                        },
+                        "bytes": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 10485760
+                        },
+                        "content": {
+                          "type": "string",
+                          "contentEncoding": "base64",
+                          "description": "Validated attachment bytes encoded as base64."
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Normalized HTTP 401 error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Normalized HTTP 403 error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Normalized HTTP 404 error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Normalized HTTP 429 error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Normalized HTTP 500 error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Normalized HTTP 503 error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Requires a valid signed Gateway context and chat.read access. The caller must participate in the conversation and the message must be visible to them. Returns JSON metadata and content; data.content contains the validated file bytes encoded as base64, not a binary response."
+      }
+    },
+    "/conversations/{conversationId}/calls": {
+      "post": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "post_conversations__conversationId__calls",
+        "summary": "Iniciar una llamada de voz en una conversación",
+        "description": "Ruta interna protegida por X-SRD-Context firmado. Acepta únicamente contexto emitido por Gateway y permiso chat.read; el usuario y la junta deben ser participantes de la conversación. Finaliza llamadas caducadas antes de comprobar conflictos. Una llamada ringing o accepted existente devuelve 409. No añade un límite de solicitudes propio; el límite público se aplica en Gateway.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la conversación.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Llamada creada en estado ringing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "conversation_id",
+                        "caller_id",
+                        "callee_id",
+                        "status",
+                        "created_at",
+                        "answered_at",
+                        "ended_at"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "conversation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "caller_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "callee_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "ringing"
+                          ]
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "answered_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time"
+                        },
+                        "ended_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time"
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado inválido o vencido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso chat.read insuficiente o emisor interno no autorizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversación fuera de la junta o no accesible para el participante",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Ya existe una llamada ringing o accepted en esta conversación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error inesperado al iniciar la llamada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Identity o Chat no disponible temporalmente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{conversationId}/calls/{callId}/signal": {
+      "post": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "post_conversations__conversationId__calls__callId__signal",
+        "summary": "Enviar una señal de una llamada de voz",
+        "description": "Ruta interna protegida por X-SRD-Context firmado; solo contexto emitido por Gateway y permiso chat.read. La junta, el usuario y la llamada deben corresponder a un participante. Se aceptan offer, answer, candidate y mute según el esquema: caller envía offer; callee envía answer después de aceptar; ambos participantes activos pueden enviar candidate y mute. La llamada debe estar ringing o accepted. Offer y answer solo se admiten una vez por llamada; se limita a 256 candidate y 120 mute por remitente. El cuerpo HTTP no puede superar 32768 bytes.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la conversación.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "callId",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la llamada.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "kind",
+                  "payload"
+                ],
+                "description": "payload debe corresponder al kind seleccionado. El servicio conserva únicamente los campos admitidos para ese tipo.",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "offer",
+                      "answer",
+                      "candidate",
+                      "mute"
+                    ]
+                  },
+                  "payload": {
+                    "$ref": "#/components/schemas/VoiceSignalPayload"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Señal aceptada y almacenada durante la vigencia de la llamada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "sequence"
+                      ],
+                      "properties": {
+                        "sequence": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado inválido o vencido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permiso chat.read, emisor Gateway o rol de quien envía la señal no autorizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversación o llamada fuera de la junta o no accesible para el participante",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "La llamada ya no está activa o el offer/answer ya fue enviado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "El cuerpo completo de la solicitud supera 32768 bytes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "kind o payload requerido, inválido o fuera de los límites de campo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Cuota de señales por remitente excedida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error inesperado al almacenar la señal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Chat no disponible temporalmente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{conversationId}/calls/{callId}/transition": {
+      "post": {
+        "tags": [
+          "Chat"
+        ],
+        "operationId": "post_conversations__conversationId__calls__callId__transition",
+        "summary": "Cambiar el estado de una llamada de voz",
+        "description": "Ruta interna protegida por X-SRD-Context firmado. Acepta unicamente contexto vigente emitido por Gateway, ligado al metodo, ruta y cuerpo, con nonce de un solo uso. Requiere permiso chat.read y que la junta, conversacion, usuario y llamada correspondan a un participante. accept/reject solo puede ejecutarlo la persona llamada mientras ringing; end/fail solo pueden ejecutarlo participantes mientras ringing o accepted. Las acciones terminales registran el resultado en el chat y eliminan las senales privadas de la llamada.",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la conversacion.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "callId",
+            "in": "path",
+            "required": true,
+            "description": "UUID de la llamada.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "action"
+                ],
+                "description": "accept/reject solo son validos para la persona llamada mientras el estado es ringing. end/fail requieren una llamada ringing o accepted y pueden ejecutarlos sus participantes.",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "accept",
+                      "reject",
+                      "end",
+                      "fail"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transicion aplicada; devuelve el estado y los identificadores de la llamada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceCallDetailResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Contexto interno firmado invalido, vencido o reutilizado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Emisor o permiso chat.read no autorizado, o accept/reject ejecutado por quien inicio la llamada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversacion o llamada fuera de la junta o no accesible para el participante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Accion incompatible con el estado actual; accept/reject requiere ringing y end/fail requiere una llamada activa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Accion requerida o no incluida en accept, reject, end, fail.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error inesperado al procesar la transicion.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chat-attachment-references/{id}": {
+      "get": {
+        "summary": "Comprobar si un adjunto sigue referenciado en mensajes de la junta",
+        "description": "Ruta exclusiva para comunicación entre servicios; no es una API de navegador. Exige contexto interno firmado para audiencia Chat y emisor files, vigente, con método, ruta, hash y nonce validados. El contexto debe incluir organization_id. La consulta busca el attachment UUID únicamente en mensajes de esa junta y excluye los marcados deleted_for_all_at. Un identificador inexistente o sin referencia responde referenced=false; no revela contenido ni identidad de mensajes.",
+        "operationId": "internal_get_chat_attachment_reference",
+        "security": [
+          {
+            "internal": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "UUID del adjunto consultado por Files.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indica si el adjunto conserva al menos una referencia visible dentro de la junta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "referenced"
+                      ],
+                      "properties": {
+                        "referenced": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "required": [
+                        "correlation_id"
+                      ],
+                      "properties": {
+                        "correlation_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "El contexto interno falta, venció, fue reutilizado o no coincide con la audiencia, método, ruta o cuerpo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "El emisor no es Files o el contexto no incluye la junta requerida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "El identificador de ruta no tiene formato UUID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "No se pudo consultar la base de datos de Chat.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChatActivity": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["typing", "recording", "idle"]
+          }
+        },
+        "required": ["kind"]
+      },
+      "ChatStart": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "user_id"
+        ]
+      },
+      "ChatMessage": {
+        "type": "object",
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10000
+          }
+        },
+        "required": [
+          "client_id",
+          "body"
+        ]
+      },
+      "ChatReceipt": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "delivered",
+              "read"
+            ]
+          },
+          "message_ids": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 25,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "required": [
+          "kind",
+          "message_ids"
+        ]
+      },
+      "ChatBroadcastAuth": {
+        "type": "object",
+        "properties": {
+          "socket_id": {
+            "type": "string",
+            "pattern": "^[0-9]+\\.[0-9]+$"
+          },
+          "channel_name": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "socket_id",
+          "channel_name"
+        ]
+      },
+      "TreasuryOpening": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$"
+          },
+          "effective_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "concept": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          },
+          "support_note": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "idempotency_key": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "amount",
+          "effective_date",
+          "concept",
+          "idempotency_key"
+        ]
+      },
+      "TreasuryMovement": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "income",
+              "expense"
+            ]
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,11})(\\.[0-9]{1,2})?$",
+            "description": "Mayor que cero; validación estricta en el servicio."
+          },
+          "effective_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "concept": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          },
+          "support_note": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "idempotency_key": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "kind",
+          "amount",
+          "effective_date",
+          "concept",
+          "idempotency_key"
+        ]
+      },
+      "TreasuryReversal": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500
+          },
+          "idempotency_key": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "reason",
+          "idempotency_key"
+        ]
+      },
+      "InventoryAsset": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 40,
+            "pattern": "^[A-Za-z0-9._-]+$"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "real_estate",
+              "movable"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 160
+          },
+          "category": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "unit": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 5000
+          },
+          "location": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 180
+          },
+          "condition": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80
+          },
+          "responsible_name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000000
+          },
+          "idempotency_key": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "code",
+          "type",
+          "name",
+          "location",
+          "condition",
+          "quantity",
+          "idempotency_key"
+        ]
+      },
+      "InventoryAssetUpdate": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 160
+          },
+          "category": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "unit": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 5000
+          },
+          "location": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 180
+          },
+          "condition": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 80
+          },
+          "responsible_name": {
+            "type": "string",
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "version",
+          "name",
+          "location",
+          "condition"
+        ]
+      },
+      "InventoryMovement": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "in",
+              "out",
+              "adjust"
+            ]
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000000
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 500
+          },
+          "idempotency_key": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "type",
+          "quantity",
+          "reason",
+          "idempotency_key"
+        ]
+      },
+      "InventoryRetire": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 500
+          },
+          "idempotency_key": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "version",
+          "reason",
+          "idempotency_key"
+        ]
+      },
+      "NotificationPreferences": {
+        "type": "object",
+        "properties": {
+          "event_changes": {
+            "type": "boolean"
+          },
+          "reminders": {
+            "type": "boolean"
+          },
+          "chat_messages": {
+            "type": "boolean",
+            "description": "Avisos opcionales de mensajes; omitir en clientes antiguos conserva la preferencia."
+          },
+          "quiet_start": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$",
+            "description": "Inicio incluido del silencio diario, hora de Colombia. Enviar con quiet_end; ambos null desactivan. Omitir ambos conserva el horario existente."
+          },
+          "quiet_end": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$",
+            "description": "Fin excluido; distinto del inicio. Puede cruzar medianoche. Solo oculta el distintivo web; no descarta avisos ni cambia presencia."
+          }
+        },
+        "required": [
+          "event_changes",
+          "reminders"
+        ]
+      },
+      "CalendarSettings": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "editor_roles": {
+            "type": "array",
+            "maxItems": 4,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "registrar",
+                "treasurer",
+                "auditor",
+                "viewer"
+              ]
+            }
+          }
+        },
+        "required": [
+          "version",
+          "editor_roles"
+        ]
+      },
+      "CalendarEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "meeting",
+              "appointment",
+              "activity",
+              "important_date"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 160
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "participants": {
+            "type": "array",
+            "maxItems": 50,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "IDs de integrantes activos de la junta. Omitir en el alta equivale a lista vacía."
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title_en": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 2,
+            "maxLength": 160,
+            "description": "Versión inglesa redactada por la junta; opcional para clientes y eventos anteriores."
+          },
+          "location_en": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 160
+          },
+          "description_en": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 4000
+          },
+          "remind_24h": {
+            "type": "boolean",
+            "default": true,
+            "description": "Anticipación del evento; omitir activa esta anticipación. La preferencia personal puede suprimir la entrega."
+          },
+          "remind_1h": {
+            "type": "boolean",
+            "default": true,
+            "description": "Anticipación del evento; omitir activa esta anticipación. La preferencia personal puede suprimir la entrega."
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "starts_at",
+          "ends_at"
+        ]
+      },
+      "CalendarEventUpdate": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "meeting",
+              "appointment",
+              "activity",
+              "important_date"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 160
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "participants": {
+            "type": "array",
+            "maxItems": 50,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Omitir conserva los participantes; [] elimina todas las asignaciones."
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title_en": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 2,
+            "maxLength": 160,
+            "description": "Versión inglesa redactada por la junta; opcional para clientes y eventos anteriores."
+          },
+          "location_en": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 160
+          },
+          "description_en": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 4000
+          },
+          "remind_24h": {
+            "type": "boolean",
+            "description": "Anticipación del evento; omitir conserva su valor anterior. Requiere versión vigente y permiso de edición."
+          },
+          "remind_1h": {
+            "type": "boolean",
+            "description": "Anticipación del evento; omitir conserva su valor anterior. Requiere versión vigente y permiso de edición."
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "starts_at",
+          "ends_at",
+          "version"
+        ]
+      },
+      "CalendarCancel": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "version"
+        ]
+      },
+      "CalendarInvitationResponse": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "declined"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "response",
+          "version"
+        ]
+      },
+      "PersonFilterSettings": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "base": {
+            "type": "array",
+            "maxItems": 9,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "status",
+                "zone",
+                "affiliated",
+                "document_type",
+                "gender",
+                "descriptive_role",
+                "position_code",
+                "birth_date",
+                "registered_at"
+              ]
+            }
+          },
+          "custom": {
+            "type": "array",
+            "maxItems": 20,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "delegated_roles": {
+            "type": "array",
+            "maxItems": 4,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "registrar",
+                "treasurer",
+                "auditor",
+                "viewer"
+              ]
+            }
+          }
+        },
+        "required": [
+          "version",
+          "base",
+          "custom"
+        ]
+      },
+      "PlanillaSettings": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "allowed_columns": {
+            "type": "array",
+            "maxItems": 8,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "email",
+                "phone",
+                "property_name",
+                "zone",
+                "position_label",
+                "descriptive_role",
+                "status",
+                "affiliated"
+              ]
+            }
+          },
+          "h1": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "h2": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "h3": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "h1_en": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 120,
+            "description": "Encabezado inglés; null solo en configuraciones anteriores."
+          },
+          "h2_en": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 120
+          },
+          "h3_en": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 120
+          },
+          "delegated_roles": {
+            "type": "array",
+            "maxItems": 4,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "registrar",
+                "treasurer",
+                "auditor",
+                "viewer"
+              ]
+            }
+          }
+        },
+        "required": [
+          "version",
+          "allowed_columns",
+          "h1",
+          "h2",
+          "h3"
+        ]
+      },
+      "PersonPositionCatalog": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "maxLength": 60,
+                  "pattern": "^[a-z0-9-]+$"
+                },
+                "label": {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                "label_en": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "description": "Nombre en inglés; obligatorio al guardar, opcional en catálogos anteriores."
+                },
+                "active": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "code",
+                "label",
+                "active"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "version",
+          "items"
+        ]
+      },
+      "PersonFieldOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "label_en": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "description": "Versión inglesa, opcional para esquemas anteriores."
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "active"
+        ],
+        "additionalProperties": false
+      },
+      "PersonField": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "label_en": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "description": "Versión inglesa, opcional para esquemas anteriores."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "date",
+              "number",
+              "select"
+            ]
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "options": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/PersonFieldOption"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "type",
+          "active",
+          "required",
+          "options"
+        ],
+        "additionalProperties": false
+      },
+      "PersonFieldSchema": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "fields": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "$ref": "#/components/schemas/PersonField"
+            }
+          },
+          "delegated_roles": {
+            "type": "array",
+            "maxItems": 4,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "registrar",
+                "treasurer",
+                "auditor",
+                "viewer"
+              ]
+            },
+            "description": "Opcional; solo SA/AD. Omitir conserva las delegaciones vigentes."
+          }
+        },
+        "required": [
+          "version",
+          "fields"
+        ]
+      },
+      "QuickLink": {
+        "type": "object",
+        "properties": {
+          "function": {
+            "type": "string",
+            "enum": [
+              "register",
+              "list",
+              "lookup",
+              "settings",
+              "audit",
+              "downloads"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "label_en": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40,
+            "description": "Versión inglesa, opcional para accesos anteriores."
+          }
+        },
+        "required": [
+          "function",
+          "label"
+        ],
+        "additionalProperties": false
+      },
+      "OrganizationQuickLinks": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "common",
+              "personal"
+            ],
+            "description": "Opcional: omitir conserva la política vigente. Solo SA puede cambiarla; AD puede enviar el valor vigente."
+          },
+          "items": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "$ref": "#/components/schemas/QuickLink"
+            }
+          }
+        },
+        "required": [
+          "version",
+          "items"
+        ]
+      },
+      "PersonalQuickLinks": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "common_version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "inherit": {
+            "type": "boolean"
+          },
+          "items": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "$ref": "#/components/schemas/QuickLink"
+            }
+          }
+        },
+        "required": [
+          "version",
+          "common_version",
+          "inherit",
+          "items"
+        ]
+      },
+      "OrganizationCreate": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 40,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "terms": {
+            "type": "string",
+            "minLength": 20,
+            "maxLength": 50000
+          },
+          "terms_en": {
+            "type": "string",
+            "minLength": 20,
+            "maxLength": 50000
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "terms",
+          "terms_en"
+        ]
+      },
+      "OrganizationStatus": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "active",
+          "version"
+        ]
+      },
+      "AdministratorInvitation": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "Invitation": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "registrar",
+              "treasurer",
+              "auditor",
+              "viewer"
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "role"
+        ]
+      },
+      "InvitationCredential": {
+        "type": "object",
+        "properties": {
+          "invitation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "secret": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "invitation_id",
+          "secret"
+        ]
+      },
+      "InvitationAccept": {
+        "type": "object",
+        "properties": {
+          "invitation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "secret": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "writeOnly": true
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 120
+          },
+          "password": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 128,
+            "writeOnly": true
+          },
+          "password_confirmation": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "terms_version_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accepted": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "invitation_id",
+          "secret",
+          "name",
+          "password",
+          "password_confirmation",
+          "terms_version_id",
+          "accepted"
+        ]
+      },
+      "Membership": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "registrar",
+              "treasurer",
+              "auditor",
+              "viewer"
+            ]
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "role",
+          "active",
+          "version"
+        ]
+      },
+      "PlatformAccountStatus": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "expected_active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "active",
+          "expected_active"
+        ]
+      },
+      "SessionToken": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "Login": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "organization_code": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{3,40}$"
+          },
+          "terms_version_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accepted": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "organization_code",
+          "terms_version_id",
+          "accepted"
+        ]
+      },
+      "Verify": {
+        "type": "object",
+        "properties": {
+          "challenge_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[0-9]{6}$"
+          }
+        },
+        "required": [
+          "challenge_id",
+          "code"
+        ]
+      },
+      "Challenge": {
+        "type": "object",
+        "properties": {
+          "challenge_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "challenge_id"
+        ]
+      },
+      "EmailChange": {
+        "type": "object",
+        "properties": {
+          "new_email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 1024
+          }
+        },
+        "required": [
+          "new_email",
+          "password"
+        ]
+      },
+      "Recover": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "organization_code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "organization_code"
+        ]
+      },
+      "Reset": {
+        "type": "object",
+        "properties": {
+          "challenge_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "secret": {
+            "type": "string",
+            "minLength": 64,
+            "maxLength": 64
+          },
+          "password": {
+            "type": "string",
+            "minLength": 12,
+            "maxLength": 128
+          },
+          "password_confirmation": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "challenge_id",
+          "secret",
+          "password",
+          "password_confirmation"
+        ]
+      },
+      "Switch": {
+        "type": "object",
+        "properties": {
+          "organization_code": {
+            "type": "string"
+          },
+          "terms_version_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accepted": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "organization_code",
+          "terms_version_id",
+          "accepted"
+        ]
+      },
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "theme": {
+            "type": "string",
+            "enum": [
+              "light",
+              "dark"
+            ]
+          },
+          "presence": {
+            "type": "string",
+            "enum": [
+              "online",
+              "away",
+              "dnd",
+              "invisible"
+            ]
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "es",
+              "en"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "theme",
+          "presence"
+        ]
+      },
+      "Organization": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "accent": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "name",
+          "accent",
+          "version"
+        ]
+      },
+      "Terms": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "string",
+            "minLength": 20,
+            "maxLength": 50000
+          },
+          "body_en": {
+            "type": "string",
+            "minLength": 20,
+            "maxLength": 50000
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "body",
+          "body_en",
+          "version"
+        ]
+      },
+      "Person": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Versión vigente de /person-fields. Omitir equivale a 0; una versión antigua devuelve 409."
+          },
+          "positions_version": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Versión vigente de /person-positions. Omitir equivale a 0; una versión antigua devuelve 409."
+          },
+          "custom_values": {
+            "type": "object",
+            "maxProperties": 20,
+            "propertyNames": {
+              "format": "uuid"
+            },
+            "additionalProperties": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 500
+            },
+            "description": "UUID de campo a valor. Fechas YYYY-MM-DD, decimales en cadena (12 enteros y hasta 4 decimales), selecciones UUID de opción. Omitidos conservan su valor; null retira un valor activo."
+          },
+          "document_type": {
+            "type": "string",
+            "enum": [
+              "RC",
+              "TI",
+              "CC",
+              "CE",
+              "NIT"
+            ]
+          },
+          "document_number": {
+            "type": "string",
+            "maxLength": 30
+          },
+          "first_names": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "last_names": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "complete"
+            ]
+          },
+          "affiliated": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "zone": {
+            "type": "string",
+            "enum": [
+              "rural",
+              "urban"
+            ]
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "male",
+              "female",
+              "other"
+            ]
+          },
+          "birth_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 20
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "position_code": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 60,
+            "pattern": "^[a-z0-9-]+$",
+            "description": "Identificador del catálogo de la junta. Una opción inactiva solo puede conservarse en la ficha que ya la usaba."
+          },
+          "position_label": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 80,
+            "readOnly": true,
+            "description": "Nombre capturado al asignar el cargo; conserva su historia aunque cambie el catálogo."
+          },
+          "position_label_en": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 80,
+            "readOnly": true,
+            "description": "Nombre inglés capturado al asignar el cargo; los registros históricos sin traducción pueden conservar null."
+          },
+          "descriptive_role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "registrar",
+              "treasurer",
+              "auditor",
+              "viewer"
+            ]
+          },
+          "property_name": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "address": {
+            "type": "string",
+            "maxLength": 180
+          },
+          "neighborhood": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "authorization_basis": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "authorization_purpose": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "document_type",
+          "document_number",
+          "first_names",
+          "status",
+          "authorization_basis",
+          "authorization_purpose"
+        ]
+      },
+      "Delete": {
+        "type": "object",
+        "properties": {
+          "confirmed": {
+            "type": "boolean",
+            "const": true
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "confirmed",
+          "version"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "fields": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "fields"
+            ]
+          },
+          "correlation_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "error",
+          "correlation_id"
+        ]
+      },
+      "PlanillaSettingsWrite": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "allowed_columns": {
+            "type": "array",
+            "maxItems": 8,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "email",
+                "phone",
+                "property_name",
+                "zone",
+                "position_label",
+                "descriptive_role",
+                "status",
+                "affiliated"
+              ]
+            }
+          },
+          "h1": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "h2": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "h3": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "h1_en": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "h2_en": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "h3_en": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "delegated_roles": {
+            "type": "array",
+            "maxItems": 4,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "registrar",
+                "treasurer",
+                "auditor",
+                "viewer"
+              ]
+            }
+          }
+        },
+        "required": [
+          "version",
+          "allowed_columns",
+          "h1",
+          "h2",
+          "h3",
+          "h1_en",
+          "h2_en",
+          "h3_en"
+        ]
+      },
+      "PersonPositionCatalogWrite": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "maxLength": 60,
+                  "pattern": "^[a-z0-9-]+$"
+                },
+                "label": {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                "label_en": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "description": "Nombre en inglés; obligatorio al guardar, opcional en catálogos anteriores."
+                },
+                "active": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "code",
+                "label",
+                "active",
+                "label_en"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "version",
+          "items"
+        ]
+      },
+      "PersonFieldOptionWrite": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "label_en": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "description": "Versión inglesa, opcional para esquemas anteriores."
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "active",
+          "label_en"
+        ],
+        "additionalProperties": false
+      },
+      "PersonFieldWrite": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "label_en": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "description": "Versión inglesa, opcional para esquemas anteriores."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "date",
+              "number",
+              "select"
+            ]
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "options": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/PersonFieldOptionWrite"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "type",
+          "active",
+          "required",
+          "options",
+          "label_en"
+        ],
+        "additionalProperties": false
+      },
+      "PersonFieldSchemaWrite": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "fields": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "$ref": "#/components/schemas/PersonFieldWrite"
+            }
+          },
+          "delegated_roles": {
+            "type": "array",
+            "maxItems": 4,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "registrar",
+                "treasurer",
+                "auditor",
+                "viewer"
+              ]
+            },
+            "description": "Opcional; solo SA/AD. Omitir conserva las delegaciones vigentes."
+          }
+        },
+        "required": [
+          "version",
+          "fields"
+        ]
+      },
+      "QuickLinkWrite": {
+        "type": "object",
+        "properties": {
+          "function": {
+            "type": "string",
+            "enum": [
+              "register",
+              "list",
+              "lookup",
+              "settings",
+              "audit",
+              "downloads"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "label_en": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40,
+            "description": "Versión inglesa, opcional para accesos anteriores."
+          }
+        },
+        "required": [
+          "function",
+          "label",
+          "label_en"
+        ],
+        "additionalProperties": false
+      },
+      "OrganizationQuickLinksWrite": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "common",
+              "personal"
+            ],
+            "description": "Opcional: omitir conserva la política vigente. Solo SA puede cambiarla; AD puede enviar el valor vigente."
+          },
+          "items": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "$ref": "#/components/schemas/QuickLinkWrite"
+            }
+          }
+        },
+        "required": [
+          "version",
+          "items"
+        ]
+      },
+      "PersonalQuickLinksWrite": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "common_version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "inherit": {
+            "type": "boolean"
+          },
+          "items": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "$ref": "#/components/schemas/QuickLinkWrite"
+            }
+          }
+        },
+        "required": [
+          "version",
+          "common_version",
+          "inherit",
+          "items"
+        ]
+      },
+      "VoiceCallItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "conversation_id",
+          "caller_id",
+          "callee_id",
+          "status",
+          "created_at",
+          "answered_at",
+          "ended_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "conversation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caller_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "callee_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ringing"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "answered_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "ended_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "VoiceCallListResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "$ref": "#/components/schemas/VoiceCallItem"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "required": [
+              "correlation_id"
+            ],
+            "properties": {
+              "correlation_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        }
+      },
+      "ChatSearchMessage": {
+        "type": "object",
+        "required": [
+          "id",
+          "sequence",
+          "sender_id",
+          "body",
+          "reply_to_id",
+          "system_kind",
+          "call_duration_seconds",
+          "pinned",
+          "attachment",
+          "created_at",
+          "delivered_at",
+          "read_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sender_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "body": {
+            "type": "string"
+          },
+          "reply_to_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "system_kind": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "call_duration_seconds": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "pinned": {
+            "type": "boolean"
+          },
+          "attachment": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "required": [
+              "id",
+              "name",
+              "mime",
+              "bytes"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              },
+              "mime": {
+                "type": "string"
+              },
+              "bytes": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "delivered_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "read_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "ChatSearchResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "items"
+            ],
+            "properties": {
+              "items": {
+                "type": "array",
+                "maxItems": 50,
+                "items": {
+                  "$ref": "#/components/schemas/ChatSearchMessage"
+                }
+              }
+            }
+          },
+          "meta": {
+            "type": "object",
+            "required": [
+              "correlation_id"
+            ],
+            "properties": {
+              "correlation_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        }
+      },
+      "VoiceCallRecord": {
+        "type": "object",
+        "required": [
+          "id",
+          "conversation_id",
+          "caller_id",
+          "callee_id",
+          "status",
+          "created_at",
+          "answered_at",
+          "ended_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "conversation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caller_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "callee_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ringing",
+              "accepted",
+              "rejected",
+              "ended",
+              "missed",
+              "failed"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "answered_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "ended_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "VoiceCallDetailResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/VoiceCallRecord"
+          },
+          "meta": {
+            "type": "object",
+            "required": [
+              "correlation_id"
+            ],
+            "properties": {
+              "correlation_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        }
+      },
+      "VoiceSignalPayload": {
+        "description": "La forma depende de kind: offer/answer contienen type y SDP; candidate contiene candidate y puede incluir sdpMid/sdpMLineIndex; mute contiene muted.",
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "sdp"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "offer"
+                ]
+              },
+              "sdp": {
+                "type": "string",
+                "maxLength": 24000
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "type",
+              "sdp"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "answer"
+                ]
+              },
+              "sdp": {
+                "type": "string",
+                "maxLength": 24000
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "candidate"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "candidate": {
+                "type": "string",
+                "maxLength": 4096
+              },
+              "sdpMid": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 256
+              },
+              "sdpMLineIndex": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0,
+                "maximum": 128
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "muted"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "muted": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "VoiceCallSignalItem": {
+        "type": "object",
+        "required": [
+          "sequence",
+          "kind",
+          "payload"
+        ],
+        "properties": {
+          "sequence": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "offer",
+              "answer",
+              "candidate",
+              "mute"
+            ]
+          },
+          "payload": {
+            "$ref": "#/components/schemas/VoiceSignalPayload"
+          }
+        }
+      },
+      "VoiceCallSignalsResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "meta"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/VoiceCallSignalItem"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "required": [
+              "correlation_id"
+            ],
+            "properties": {
+              "correlation_id": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "internal": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-SRD-Context",
+        "description": "Base64(JSON claims).HMAC-SHA256; audiencia, método, ruta, hash del cuerpo, nonce y caducidad obligatorios."
+      }
+    }
+  }
+}

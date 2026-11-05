@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "description": "Inventory of accepted undocumented Laravel route templates. Empty lists mean no accepted route debt; the CI checker blocks unreviewed route drift.",
+  "services": {
+    "gateway": [],
+    "identity": [],
+    "configuration": [],
+    "records": [],
+    "audit": [],
+    "files": [],
+    "calendar": [],
+    "notifications": [],
+    "treasury": [],
+    "inventory": [],
+    "chat": []
+  }
+}

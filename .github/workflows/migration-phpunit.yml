@@ -1,0 +1,107 @@
+name: Migration backend PHPUnit
+on:
+  pull_request:
+    branches: [dev, qa, main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  phpunit:
+    name: PHPUnit ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [gateway, identity, configuration, records, audit, files, calendar, notifications, treasury, inventory, chat]
+    steps:
+      - name: Checkout backend
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout matching migration database snapshot
+        uses: actions/checkout@v4
+        with:
+          repository: jsgh1/SRD-Database
+          ref: a96fc6e40e18c19adb6588362f53fb0c8bce5e33
+          path: _db
+          persist-credentials: false
+      - name: Reassemble migrations only in CI workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          for d in _db/services/*/database/migrations; do
+            svc="$(basename "$(dirname "$(dirname "$d")")")"
+            mkdir -p "services/$svc/database/migrations"
+            cp -a "$d/." "services/$svc/database/migrations/"
+          done
+          test -f services/identity/database/migrations/2026_09_07_000002_identity.php
+          test -f services/records/database/migrations/2026_09_07_000001_records.php || test -n "$(find services/records/database/migrations -type f -name '*.php' -print -quit)"
+      - name: Checkout browser test fixtures
+        uses: actions/checkout@v4
+        with:
+          repository: jsgh1/SRD-Docker-Infra
+          ref: 6107196043de99798ec5020417ef10cab0666ac2
+          path: _infra
+          persist-credentials: false
+      - name: Restore shared test fixtures and Laravel writable folders
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tools/browser-tests
+          cp _infra/tools/browser-tests/silence.mp3 tools/browser-tests/silence.mp3
+          for svc in gateway identity configuration records audit files calendar notifications treasury inventory chat; do
+            mkdir -p "services/$svc/bootstrap/cache" "services/$svc/storage/framework/cache/data" "services/$svc/storage/framework/sessions" "services/$svc/storage/framework/views" "services/$svc/storage/logs"
+          done
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_sqlite, sqlite3, gd, zip, pcntl, dom, exif, fileinfo
+          coverage: pcov
+      - name: Install service dev dependencies
+        working-directory: services/${{ matrix.service }}
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Validate undocumented route classification inventory
+        if: matrix.service == 'gateway'
+        run: |
+          php tools/contracts/check-openapi-classification.php --self-test
+          php tools/contracts/check-openapi-classification.php contracts/undocumented-route-baseline.json contracts/route-classification.json
+      - name: Validate OpenAPI response schema structure
+        if: matrix.service == 'gateway'
+        run: |
+          php tools/contracts/check-openapi-success-schemas.php --self-test
+          php tools/contracts/check-openapi-success-schemas.php
+      - name: Validate dynamic auth action contract
+        if: matrix.service == 'gateway'
+        run: |
+          php tools/contracts/check-openapi-auth-actions.php --self-test
+          php tools/contracts/check-openapi-auth-actions.php contracts/gateway.openapi.json
+      - name: Validate service OpenAPI routes
+        working-directory: services/${{ matrix.service }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          php ../../tools/contracts/check-openapi-routes.php --self-test
+          php artisan route:list --json > "$RUNNER_TEMP/${{ matrix.service }}-routes.json"
+          php ../../tools/contracts/check-openapi-routes.php "../../contracts/${{ matrix.service }}.openapi.json" "$RUNNER_TEMP/${{ matrix.service }}-routes.json" "../../contracts/undocumented-route-baseline.json"
+      - name: Publish Laravel route inventory artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: laravel-routes-${{ matrix.service }}
+          path: ${{ runner.temp }}/${{ matrix.service }}-routes.json
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Prepare per-service coverage output
+        working-directory: services/${{ matrix.service }}
+        run: mkdir -p coverage
+      - name: Run service PHPUnit and collect coverage
+        working-directory: services/${{ matrix.service }}
+        run: php vendor/bin/phpunit --colors=never --coverage-clover=coverage/clover.xml
+      - name: Publish per-service coverage artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phpunit-coverage-${{ matrix.service }}
+          path: services/${{ matrix.service }}/coverage/clover.xml
+          if-no-files-found: warn
